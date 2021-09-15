@@ -1,0 +1,2 @@
+# NikoKit
+Python quick solution
