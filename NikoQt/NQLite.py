@@ -1,4 +1,5 @@
 from NikoKit.NikoStd.NKVersion import NKVersion
+import os.path as p
 
 
 class NQLite:
@@ -8,9 +9,12 @@ class NQLite:
                  version,
                  version_tag,
                  runtime=None,
+                 appdata_dir="",
                  enable_dark_theme=True,
                  enable_timer=True,
-                 enable_window_manager=True
+                 enable_window_manager=True,
+                 enable_appdata_manager=True,
+                 enable_nk_language=True,
                  ):
         # Storage
         self.QApplication = None
@@ -38,8 +42,16 @@ class NQLite:
         NQApplication.Runtime.App.name_short = name_short
         NQApplication.Runtime.App.version = version
         NQApplication.Runtime.App.version_tag = version_tag
+        NQApplication.Runtime.Path.appdata_dir = appdata_dir
+
+        if not appdata_dir:
+            NQApplication.Runtime.Path.appdata_dir = p.join(p.expanduser('~'), 'Documents', name)
 
         NQApplication.load_basic()
+        if enable_appdata_manager:
+            NQApplication.load_service_appdata_manager()
+        if enable_nk_language:
+            NQApplication.load_service_nk_language()
         if enable_timer:
             NQApplication.load_service_timer()
         if enable_window_manager:

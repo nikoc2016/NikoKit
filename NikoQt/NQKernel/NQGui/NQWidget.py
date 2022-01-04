@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from NikoKit.NikoQt.NQAdapter import QWidget
+from NikoKit.NikoQt.NQApplication import Runtime
 from NikoKit.NikoStd.NKPrintableClass import NKPrintableClass
 
 NQWidgetRegistry = set()
@@ -27,6 +28,22 @@ class NQBasicWidget(NKPrintableClass, QWidget):
         self.w_id = str(uuid4())
         self.w_name = w_name
         self.w_use_lang = w_use_lang
+
+        # Initialization Procedure
+        self.construct()
+        self.connect_signals()
+
+    def construct(self):
+        pass
+
+    def connect_signals(self):
+        pass
+
+    def lang(self, raw_str):
+        if self.w_use_lang:
+            return Runtime.Service.NKLang.tran(raw_str)
+        else:
+            return raw_str
 
     def to_ghost(self):
         my_ghost = NQGhost.new_ghost(self.__class__.__name__)

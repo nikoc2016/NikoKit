@@ -2,7 +2,7 @@ from NikoKit.NikoQt.NQAdapter import *
 from NikoKit.NikoStd.NKVersion import NKVersion
 
 
-class Signals(QObject):
+class DefaultSignals(QObject):
     second_passed = Signal(int)  # Range 0-59
     minute_passed = Signal(int)  # Range 0-59
     hour_passed = Signal(int)  # Range 0-23
@@ -10,7 +10,11 @@ class Signals(QObject):
     month_passed = Signal(int)  # Range 1-12
 
 
-class App:
+class DefaultPath:
+    appdata_dir = None  # MyDoc\AppName
+
+
+class DefaultApp:
     name = "NikoQt"
     name_short = "NQ"
     version = NKVersion("1.0.0")
@@ -21,27 +25,30 @@ class App:
     my_file_ext = ""
 
 
-class Data:
+class DefaultData:
     pass
 
 
-class Threads:
+class DefaultThreads:
     pass
 
 
-class Service:
-    timer = None
+class DefaultService:
+    NKTimer = None
+    AppDataMgr = None
+    NKLang = None
 
 
-class Gui:
-    wins = {}
-    win_mgr = None
+class DefaultGui:
+    Wins = {}
+    WinMgr = None
 
 
-class RuntimeDefault:
-    Signals = Signals()
-    App = App
-    Data = Data
-    Threads = Threads
-    Service = Service
-    Gui = Gui
+class DefaultRuntime:
+    Signals = DefaultSignals()
+    Path = DefaultPath
+    App = DefaultApp
+    Data = DefaultData
+    Threads = DefaultThreads
+    Service = DefaultService
+    Gui = DefaultGui
