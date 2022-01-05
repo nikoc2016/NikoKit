@@ -1,5 +1,5 @@
 from NikoKit.NikoQt.NQAdapter import *
-from NikoKit.NikoQt.NQApplication import Runtime
+from NikoKit.NikoQt import NQApplication
 
 
 class NQTimer(QObject):
@@ -30,15 +30,15 @@ class NQTimer(QObject):
         # Emit Signals
         if self.previous_has_initiated:
             if self.previous_month != curr_month:
-                Runtime.Signals.month_passed.emit(curr_month)
+                NQApplication.Runtime.Signals.month_passed.emit(curr_month)
             if self.previous_day != curr_day:
-                Runtime.Signals.day_passed.emit(curr_day)
+                NQApplication.Runtime.Signals.day_passed.emit(curr_day)
             if self.previous_hour != curr_hour:
-                Runtime.Signals.hour_passed.emit(curr_hour)
+                NQApplication.Runtime.Signals.hour_passed.emit(curr_hour)
             if self.previous_minute != curr_minute:
-                Runtime.Signals.minute_passed.emit(curr_minute)
+                NQApplication.Runtime.Signals.minute_passed.emit(curr_minute)
             if self.previous_second != curr_second:
-                Runtime.Signals.second_passed.emit(curr_second)
+                NQApplication.Runtime.Signals.second_passed.emit(curr_second)
 
         # Cache Current Time
         self.previous_month = curr_month

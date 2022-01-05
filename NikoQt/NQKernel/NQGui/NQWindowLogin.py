@@ -1,5 +1,5 @@
+from NikoKit.NikoQt import NQApplication
 from NikoKit.NikoQt.NQAdapter import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QPushButton
-from NikoKit.NikoQt.NQApplication import Runtime
 from NikoKit.NikoQt.NQKernel.NQGui.NQWindow import NQWindow
 
 
@@ -49,11 +49,12 @@ class NQWindowLogin(NQWindow):
                                             w_height=w_height,
                                             **kwargs)
 
-        # Initialization
+    def show(self):
         appdata = self.load_appdata()
+        self.apply_appdata(self.load_appdata())
+        super(NQWindowLogin, self).show()
         if appdata["auto_login"]:
             self.slot_login_button_clicked()
-        self.apply_appdata(self.load_appdata())
 
     def construct(self):
         super(NQWindowLogin, self).construct()
@@ -64,6 +65,7 @@ class NQWindowLogin(NQWindow):
         password_lay = QHBoxLayout()
         password_label = QLabel(self.lang("password"))
         password_line_edit = QLineEdit()
+        password_line_edit.setEchoMode(QLineEdit.Password)
         checkbox_lay = QHBoxLayout()
         remember_me_checkbox = QCheckBox(self.lang("remember") + self.lang("account"))
         auto_login_checkbox = QCheckBox(self.lang("auto") + self.lang("login"))
@@ -117,11 +119,9 @@ class NQWindowLogin(NQWindow):
             if self.login_validator(username, password):
                 self.save_appdata(self.extract_appdata())
                 self.signal_done.emit(self.w_id, (username, password))
+                self.close()
             else:
-                self.message_label.setText(self.lang("username")
-                                           + self.lang("or")
-                                           + self.lang("password")
-                                           + self.lang("incorrect"))
+                self.message_label.setText(self.lang("username", "or", "password", "incorrect"))
         except Exception as e:
             self.message_label.setText("validator failure:" + str(e))
 
@@ -129,15 +129,15 @@ class NQWindowLogin(NQWindow):
         return self.username_line_edit.text(), self.password_line_edit.text()
 
     def load_appdata(self):
-        local_appdata = Runtime.Service.AppDataMgr.get(self.appdata_name)
+        local_appdata = NQApplication.Runtime.Service.AppDataMgr.get(self.appdata_name)
         appdata = self.new_appdata()
         if local_appdata:
             appdata.update(local_appdata)
         return appdata
 
     def save_appdata(self, appdata):
-        Runtime.Service.AppDataMgr.set(self.appdata_name, appdata)
-        Runtime.Service.AppDataMgr.save(self.appdata_name)
+        NQApplication.Runtime.Service.AppDataMgr.set(self.appdata_name, appdata)
+        NQApplication.Runtime.Service.AppDataMgr.save(self.appdata_name)
 
     def extract_appdata(self):
         appdata = self.new_appdata()

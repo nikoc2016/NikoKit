@@ -17,6 +17,18 @@ class NKLanguage:
                 "remember": u"记住",
                 "auto": u"自动",
                 "login": u"登录",
+                "animation": u"动画",
+                "asset": u"资产",
+                "texture": u"贴图",
+                "fx": u"特效",
+                "art": u"美术",
+                "assemble": u"组装",
+                "import": u"导入",
+                "export": u"导出",
+                "light": u"灯光",
+                "render": u"渲染",
+                "kpi": u"绩效",
+                "panel": u"面板",
             }
         }
         self.chosen_language = NKConst.ZH_CN

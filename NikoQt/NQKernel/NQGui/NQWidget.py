@@ -1,7 +1,6 @@
 from uuid import uuid4
-
+from NikoKit.NikoQt import NQApplication
 from NikoKit.NikoQt.NQAdapter import QWidget
-from NikoKit.NikoQt.NQApplication import Runtime
 from NikoKit.NikoStd.NKPrintableClass import NKPrintableClass
 
 NQWidgetRegistry = set()
@@ -23,11 +22,18 @@ class NQGhost:
 
 # Note: Remember to register your widget by modifying NQGui.register_all_widgets()
 class NQBasicWidget(NKPrintableClass, QWidget):
-    def __init__(self, w_name="NQBasicWidget", w_use_lang=True):
+    def __init__(self,
+                 w_name="NQBasicWidget",
+                 w_title="NQBasicWidget",
+                 w_use_lang=True,
+                 w_icon=None
+                 ):
         super(NQBasicWidget, self).__init__()
         self.w_id = str(uuid4())
         self.w_name = w_name
+        self.w_title = w_title
         self.w_use_lang = w_use_lang
+        self.w_icon = w_icon
 
         # Initialization Procedure
         self.construct()
@@ -39,16 +45,20 @@ class NQBasicWidget(NKPrintableClass, QWidget):
     def connect_signals(self):
         pass
 
-    def lang(self, raw_str):
+    def lang(self, *args):
         if self.w_use_lang:
-            return Runtime.Service.NKLang.tran(raw_str)
+            result = ""
+            for arg in args:
+                result += NQApplication.Runtime.Service.NKLang.tran(arg)
+            return result
         else:
-            return raw_str
+            return ''.join(args)
 
     def to_ghost(self):
         my_ghost = NQGhost.new_ghost(self.__class__.__name__)
         my_ghost.update({
             "w_name": self.w_name,
+            "w_title": self.w_title,
             "w_use_lang": self.w_use_lang
         })
         return my_ghost
@@ -62,6 +72,7 @@ class NQBasicWidget(NKPrintableClass, QWidget):
     def from_ghost(cls, ghost):
         return cls(
             w_name=ghost["w_name"],
-            w_use_lang=ghost["w_use_lang"]
+            w_title=ghost["w_title"],
+            w_use_lang=ghost["w_use_lang"],
             # Call NQGhost.build(child_ghost) to append children
         )
