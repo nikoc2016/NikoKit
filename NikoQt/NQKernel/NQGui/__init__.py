@@ -2,7 +2,7 @@ from NikoKit.NikoQt.NQKernel.NQGui import NQWidget, NQWidgetLaunchPad, NQWindow,
 
 
 def register_all_widgets():
-    NQWidget.NQWidgetRegistry.add(NQWidget.NQBasicWidget)
+    NQWidget.NQWidgetRegistry.add(NQWidget.NQWidget)
     NQWidget.NQWidgetRegistry.add(NQWidgetLaunchPad.NQWidgetLaunchPad)
 
     NQWidget.NQWidgetRegistry.add(NQWindow.NQWindow)

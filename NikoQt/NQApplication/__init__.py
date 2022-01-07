@@ -1,6 +1,7 @@
 import sys
 import os.path as p
 
+import GIconPack
 from NikoKit.NikoQt.NQApplication.NQRuntimeInterfaces import DefaultRuntime
 from NikoKit.NikoQt.NQAdapter import *
 
@@ -39,9 +40,18 @@ def load_service_appdata_manager():
     Runtime.Service.AppDataMgr.load_all()
 
 
-def load_window_manager():
+def load_service_window_manager():
     from NikoKit.NikoQt.NQKernel.NQGui.NQWindow import NQWindowManager
     Runtime.Gui.WinMgr = NQWindowManager
+
+
+def load_service_data_loader():
+    from NikoKit.NikoLib.NKDataLoader import NKDataLoader
+    Runtime.Service.DataLoader = NKDataLoader(appdata_mgr=Runtime.Service.AppDataMgr)
+    Runtime.Signals.second_passed.connect(Runtime.Service.DataLoader.slot_second_elapsed, Qt.QueuedConnection)
+    from NikoKit.NikoQt.NQKernel.NQGui.NQWindowDataLoader import NQWindowDataLoader
+    Runtime.Gui.WinDataLoader = NQWindowDataLoader(w_icon=Runtime.App.icon, data_loader=Runtime.Service.DataLoader)
+    Runtime.Signals.tick_passed.connect(Runtime.Gui.WinDataLoader.slot_refresh)
 
 
 def apply_dark_theme():

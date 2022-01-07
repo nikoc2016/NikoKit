@@ -2,12 +2,44 @@ import json
 import os
 import os.path as p
 
-from NikoKit.NikoStd.NKPrintableClass import NKPrintableClass
+from NikoKit.NikoStd.NKPrintableMixin import NKPrintableMixin
 from NikoKit.NikoLib.NKFileSystem import scout
 
 
-class NKAppDataManager(NKPrintableClass):
+class NKAppDataMixin:
+    @classmethod
+    def new_appdata(cls):
+        return {}
+
+    def __init__(self, appdata_mgr, appdata_name, *args, **kwargs):
+        self.appdata_mgr = appdata_mgr
+        self.appdata_name = appdata_name
+        super(NKAppDataMixin, self).__init__(*args, **kwargs)
+
+    def load_appdata(self):
+        local_appdata = self.appdata_mgr.get(self.appdata_name)
+        appdata = self.new_appdata()
+        if local_appdata:
+            appdata.update(local_appdata)
+        return appdata
+
+    def save_appdata(self, appdata):
+        self.appdata_mgr.set(self.appdata_name, appdata)
+        self.appdata_mgr.save(self.appdata_name)
+
+    def extract_appdata(self):
+        appdata = self.new_appdata()
+        # Set appdata to this dict
+        return appdata
+
+    def apply_appdata(self, appdata):
+        # You will have to set up appdata here
+        pass
+
+
+class NKAppDataManager(NKPrintableMixin):
     def __init__(self, appdata_root):
+        super(NKAppDataManager, self).__init__()
         self.appdata_root = appdata_root
         self.appdata_objects = {}
         self.appdata_ext = ".nkappdata"

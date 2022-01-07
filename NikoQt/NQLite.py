@@ -8,12 +8,14 @@ class NQLite:
                  name_short,
                  version,
                  version_tag,
+                 icon,
                  runtime=None,
                  appdata_dir="",
                  enable_dark_theme=True,
                  enable_timer=True,
                  enable_window_manager=True,
                  enable_appdata_manager=True,
+                 enable_data_loader=True,
                  enable_nk_language=True,
                  ):
         # Storage
@@ -42,6 +44,7 @@ class NQLite:
         NQApplication.Runtime.App.name_short = name_short
         NQApplication.Runtime.App.version = version
         NQApplication.Runtime.App.version_tag = version_tag
+        NQApplication.Runtime.App.icon = icon
         NQApplication.Runtime.Path.appdata_dir = appdata_dir
 
         if not appdata_dir:
@@ -55,7 +58,9 @@ class NQLite:
         if enable_timer:
             NQApplication.load_service_timer()
         if enable_window_manager:
-            NQApplication.load_window_manager()
+            NQApplication.load_service_window_manager()
+        if enable_data_loader:
+            NQApplication.load_service_data_loader()
         if enable_dark_theme:
             NQApplication.apply_dark_theme()
 

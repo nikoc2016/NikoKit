@@ -6,6 +6,13 @@ class NKLanguage:
     def __init__(self):
         self.dictionaries = {
             NKConst.ZH_CN: {
+                "UNLOAD": "未加载",
+                "LOADING": "加载中",
+                "UPDATING": "更新中",
+                "CLEARING": "清理中",
+                "LOADED": "已加载",
+                "LOAD_ERROR": "加载错误",
+                "test": u"测试",
                 "hello": u"你好",
                 "and": u"和",
                 "or": u"或",
@@ -29,6 +36,23 @@ class NKLanguage:
                 "render": u"渲染",
                 "kpi": u"绩效",
                 "panel": u"面板",
+                "load": "加载",
+                "download": u"下载",
+                "clear": u"清空",
+                "all": u"全部",
+                "apply": u"应用",
+                "setting": u"设置",
+                "NQWindowDataLoader": u"数据加载管理器",
+                "data": "数据",
+                "pack": "包",
+                "status": "状态",
+                "time": "时间",
+                "gap": "间隔",
+                "update": "更新",
+                "available": "可用",
+                "operation": "操作",
+                "next_time": "下次",
+                "countdown": "倒数",
             }
         }
         self.chosen_language = NKConst.ZH_CN

@@ -3,11 +3,12 @@ from NikoKit.NikoStd.NKVersion import NKVersion
 
 
 class DefaultSignals(QObject):
+    tick_passed = Signal()
     second_passed = Signal(int)  # Range 0-59
     minute_passed = Signal(int)  # Range 0-59
-    hour_passed = Signal(int)  # Range 0-23
-    day_passed = Signal(int)  # Range 1-31
-    month_passed = Signal(int)  # Range 1-12
+    hour_passed = Signal(int)    # Range 0-23
+    day_passed = Signal(int)     # Range 1-31
+    month_passed = Signal(int)   # Range 1-12
 
 
 class DefaultPath:
@@ -23,6 +24,7 @@ class DefaultApp:
     my_dir = ""
     my_file_name = ""
     my_file_ext = ""
+    icon = None
 
 
 class DefaultData:
@@ -37,11 +39,13 @@ class DefaultService:
     NKTimer = None
     AppDataMgr = None
     NKLang = None
+    DataLoader = None
 
 
 class DefaultGui:
     Wins = {}
     WinMgr = None
+    WinDataLoader = None
 
 
 class DefaultRuntime:

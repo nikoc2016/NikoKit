@@ -16,7 +16,7 @@ class NQTimer(QObject):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.slot_timeout)
-        self.timer.start(1000)
+        self.timer.start(500)
 
     def slot_timeout(self):
         # Extract Current Time
@@ -39,6 +39,7 @@ class NQTimer(QObject):
                 NQApplication.Runtime.Signals.minute_passed.emit(curr_minute)
             if self.previous_second != curr_second:
                 NQApplication.Runtime.Signals.second_passed.emit(curr_second)
+            NQApplication.Runtime.Signals.tick_passed.emit()
 
         # Cache Current Time
         self.previous_month = curr_month

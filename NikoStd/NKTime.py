@@ -1,7 +1,34 @@
 import datetime
 from functools import wraps
 
-DatetimeFormat = ""
+from datetime import datetime
+
+
+class NKDatetime:
+    DT_FORMAT = '%Y-%m-%d_%H:%M:%S'
+
+    @staticmethod
+    def now():
+        return datetime.now()
+
+    @staticmethod
+    def datetime_to_str(target_datetime):
+        if not target_datetime:
+            return ""
+        return target_datetime.strftime(NKDatetime.DT_FORMAT)
+
+    @staticmethod
+    def str_to_datetime(target_datetime_str):
+        if not target_datetime_str:
+            return None
+        return datetime.strptime(target_datetime_str, NKDatetime.DT_FORMAT)
+
+    @staticmethod
+    def if_datetime_expired(target_datetime, expiration_seconds):
+        now_datetime = NKDatetime.now()
+        if now_datetime < target_datetime or (now_datetime - target_datetime).seconds < expiration_seconds:
+            return True
+        return False
 
 
 class TimeMeasure:

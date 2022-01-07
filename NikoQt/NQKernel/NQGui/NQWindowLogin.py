@@ -1,12 +1,12 @@
+from NikoKit.NikoLib.NKAppDataManager import NKAppDataMixin
 from NikoKit.NikoQt import NQApplication
 from NikoKit.NikoQt.NQAdapter import QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QPushButton
 from NikoKit.NikoQt.NQKernel.NQGui.NQWindow import NQWindow
 
 
-class NQWindowLogin(NQWindow):
-
-    @staticmethod
-    def new_appdata():
+class NQWindowLogin(NKAppDataMixin, NQWindow):
+    @classmethod
+    def new_appdata(cls):
         return {
             "username": "",
             "password": "",
@@ -16,18 +16,20 @@ class NQWindowLogin(NQWindow):
 
     def __init__(self,
                  login_validator,
+                 w_name="NQWindowLogin",
                  w_title="NQWindowLogin",
                  w_width=300,
                  w_height=100,
                  appdata_name="Login",
+                 appdata_mgr=None,
                  require_username=True,
                  require_password=True,
                  allow_remember_me=True,
                  allow_auto_login=True,
+                 *args,
                  **kwargs):
         # Private Storage
         self.login_validator = login_validator
-        self.appdata_name = appdata_name
         self.require_username = require_username
         self.require_password = require_password
         self.allow_remember_me = allow_remember_me
@@ -44,9 +46,17 @@ class NQWindowLogin(NQWindow):
         self.message_label = None
         self.login_button = None
 
-        super(NQWindowLogin, self).__init__(w_title=w_title,
+        # Init
+        if not appdata_mgr:
+            appdata_mgr = NQApplication.Runtime.Service.AppDataMgr
+
+        super(NQWindowLogin, self).__init__(w_name=w_name,
+                                            w_title=w_title,
                                             w_width=w_width,
                                             w_height=w_height,
+                                            appdata_name=appdata_name,
+                                            appdata_mgr=appdata_mgr,
+                                            *args,
                                             **kwargs)
 
     def show(self):
@@ -127,17 +137,6 @@ class NQWindowLogin(NQWindow):
 
     def get_username_password(self):
         return self.username_line_edit.text(), self.password_line_edit.text()
-
-    def load_appdata(self):
-        local_appdata = NQApplication.Runtime.Service.AppDataMgr.get(self.appdata_name)
-        appdata = self.new_appdata()
-        if local_appdata:
-            appdata.update(local_appdata)
-        return appdata
-
-    def save_appdata(self, appdata):
-        NQApplication.Runtime.Service.AppDataMgr.set(self.appdata_name, appdata)
-        NQApplication.Runtime.Service.AppDataMgr.save(self.appdata_name)
 
     def extract_appdata(self):
         appdata = self.new_appdata()

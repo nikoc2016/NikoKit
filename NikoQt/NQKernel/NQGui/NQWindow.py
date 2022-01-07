@@ -1,6 +1,6 @@
 from NikoKit.NikoQt import NQApplication
 from NikoKit.NikoQt.NQAdapter import Signal, QEvent, Qt
-from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQBasicWidget
+from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
 
 
 class NQWindowManager:
@@ -34,10 +34,11 @@ class NQWindowManager:
         NQApplication.Runtime.Gui.Wins[w_id].slot_hide()
 
 
-class NQWindow(NQBasicWidget):
-    signal_close = Signal(str)  # Window-UUID
-    signal_minimize = Signal(str)  # Window-UUID
-    signal_maximize = Signal(str)  # Window-UUID
+class NQWindow(NQWidget):
+    signal_close = Signal(str)         # Window-UUID
+    signal_minimize = Signal(str)      # Window-UUID
+    signal_maximize = Signal(str)      # Window-UUID
+    signal_hide = Signal(str)          # Window-UUID
     signal_done = Signal(str, object)  # Window-UUID, Window-Result
 
     def __init__(self,
@@ -46,10 +47,11 @@ class NQWindow(NQBasicWidget):
                  w_height=768,
                  w_margin_x=0,
                  w_margin_y=0,
+                 *args,
                  **kwargs):
 
         # Parent Construction
-        super(NQWindow, self).__init__(w_title=w_title, **kwargs)
+        super(NQWindow, self).__init__(w_title=w_title, *args, **kwargs)
 
         # Init
         self.init_geo(w_width, w_height, w_margin_x, w_margin_y)
@@ -81,6 +83,9 @@ class NQWindow(NQBasicWidget):
 
     def slot_close(self):
         self.close()
+
+    def hideEvent(self, event):
+        self.signal_hide.emit(self.w_id)
 
     def closeEvent(self, event):
         self.signal_close.emit(self.w_id)

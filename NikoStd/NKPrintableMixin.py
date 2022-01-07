@@ -1,4 +1,7 @@
-class NKPrintableClass:
+class NKPrintableMixin:
+    def __init__(self, *args, **kwargs):
+        super(NKPrintableMixin, self).__init__(*args, **kwargs)
+
     def __repr__(self):
         base_str = "<%s %s>"
         detail_str = ""
