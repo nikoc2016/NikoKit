@@ -1,3 +1,4 @@
+from NikoKit.NikoLib.NKDatabase import NKMySQLConnector
 from NikoKit.NikoQt.NQAdapter import *
 from NikoKit.NikoStd.NKVersion import NKVersion
 
@@ -6,9 +7,9 @@ class DefaultSignals(QObject):
     tick_passed = Signal()
     second_passed = Signal(int)  # Range 0-59
     minute_passed = Signal(int)  # Range 0-59
-    hour_passed = Signal(int)    # Range 0-23
-    day_passed = Signal(int)     # Range 1-31
-    month_passed = Signal(int)   # Range 1-12
+    hour_passed = Signal(int)  # Range 0-23
+    day_passed = Signal(int)  # Range 1-31
+    month_passed = Signal(int)  # Range 1-12
 
 
 class DefaultPath:
@@ -48,6 +49,10 @@ class DefaultGui:
     WinDataLoader = None
 
 
+class DefaultDatabase:
+    conn = NKMySQLConnector()
+
+
 class DefaultRuntime:
     Signals = DefaultSignals()
     Path = DefaultPath
@@ -56,3 +61,4 @@ class DefaultRuntime:
     Threads = DefaultThreads
     Service = DefaultService
     Gui = DefaultGui
+    Database = DefaultDatabase

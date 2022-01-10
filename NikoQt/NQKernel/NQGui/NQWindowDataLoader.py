@@ -1,7 +1,7 @@
-from PySide2.QtCore import Qt, QObject, Signal
-from PySide2.QtGui import QIntValidator
+from PySide2.QtCore import Qt, QObject
+from PySide2.QtGui import QTextCursor
 from PySide2.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QGridLayout, QLabel, QCheckBox, QLineEdit, \
-    QSpinBox, QTextEdit
+    QSpinBox, QTextEdit, QTabWidget
 
 from NikoKit.NikoLib.NKDataLoader import NKDataLoader
 from NikoKit.NikoQt.NQKernel.NQFunctions import clear_layout
@@ -23,7 +23,9 @@ class NQWindowDataLoader(NQWindow):
                      btn_load,
                      btn_update,
                      btn_clear,
-                     btn_apply):
+                     btn_apply,
+                     error_text_edit,
+                     ):
             super(NQWindowDataLoader.DataLoadWidgets, self).__init__()
             self.data_load_name = data_load_name
             self.label_label = label_label
@@ -37,6 +39,7 @@ class NQWindowDataLoader(NQWindow):
             self.btn_update = btn_update
             self.btn_clear = btn_clear
             self.btn_apply = btn_apply
+            self.error_text_edit = error_text_edit
 
     def __init__(self,
                  data_loader,
@@ -60,7 +63,9 @@ class NQWindowDataLoader(NQWindow):
         self.btn_clear_all = None
         self.btn_apply_setting = None
 
-        self.error_text_edit = None
+        self.error_lay = None
+        self.error_lay_adapter = None
+        self.error_text_edit_data_loader = None
 
         super(NQWindowDataLoader, self).__init__(w_name=w_name,
                                                  w_title=w_title,
@@ -74,16 +79,16 @@ class NQWindowDataLoader(NQWindow):
         main_lay = QVBoxLayout()
         grid_lay_adapter = QWidget()
         btn_lay = QHBoxLayout()
+        error_lay_adapter = QWidget()
+        error_text_edit_data_loader = QTextEdit()
+        error_text_edit_data_loader.setReadOnly(True)
 
         btn_load_all = QPushButton(self.lang("download", "all"))
         btn_clear_all = QPushButton(self.lang("clear", "all"))
         btn_apply_setting = QPushButton(self.lang("apply", "setting"))
 
-        error_text_edit = QTextEdit()
-        error_text_edit.setReadOnly(True)
-
         main_lay.addWidget(grid_lay_adapter)
-        main_lay.addWidget(error_text_edit)
+        main_lay.addWidget(error_lay_adapter)
         main_lay.addLayout(btn_lay)
         main_lay.setStretchFactor(grid_lay_adapter, 1)
 
@@ -96,12 +101,12 @@ class NQWindowDataLoader(NQWindow):
         self.main_lay = main_lay
         self.grid_lay_adapter = grid_lay_adapter
         self.btn_lay = btn_lay
+        self.error_lay_adapter = error_lay_adapter
+        self.error_text_edit_data_loader = error_text_edit_data_loader
 
         self.btn_load_all = btn_load_all
         self.btn_clear_all = btn_clear_all
         self.btn_apply_setting = btn_apply_setting
-
-        self.error_text_edit = error_text_edit
 
         self.setLayout(self.main_lay)
 
@@ -113,8 +118,14 @@ class NQWindowDataLoader(NQWindow):
 
     def load_widgets(self):
         clear_layout(self.grid_lay)
+        clear_layout(self.error_lay)
 
         grid_lay = QGridLayout()
+        error_lay = QHBoxLayout()
+        error_tab_widget = QTabWidget()
+        error_tab_widget.addTab(self.error_text_edit_data_loader, "DataLoader")
+        error_lay.addWidget(error_tab_widget)
+
         data_name_to_widgets = {}
         grid_lay.addWidget(QLabel(self.lang("data", "pack")), 0, 0, 1, 1)
         grid_lay.addWidget(QLabel(self.lang("status")), 0, 1, 1, 1)
@@ -148,6 +159,9 @@ class NQWindowDataLoader(NQWindow):
             btn_lay.addWidget(btn_clear)
             btn_lay.addWidget(btn_apply)
 
+            error_text_edit = QTextEdit()
+            error_text_edit.setReadOnly(True)
+
             dl_widgets = self.DataLoadWidgets(
                 data_load_name=data_load_name,
                 label_label=QLabel(self.lang(data_load.label)),
@@ -160,7 +174,8 @@ class NQWindowDataLoader(NQWindow):
                 btn_load=btn_load,
                 btn_update=btn_update,
                 btn_clear=btn_clear,
-                btn_apply=btn_apply
+                btn_apply=btn_apply,
+                error_text_edit=error_text_edit,
             )
 
             btn_load.clicked.connect(self.slot_load)
@@ -177,15 +192,23 @@ class NQWindowDataLoader(NQWindow):
             grid_lay.addWidget(dl_widgets.checkbox_auto_update, idx + 1, 5, 1, 1)
             grid_lay.addWidget(dl_widgets.spinbox_auto_update_time_gap, idx + 1, 6, 1, 1)
             grid_lay.addWidget(btn_adapter, idx + 1, 7, 1, 1)
+            error_tab_widget.addTab(dl_widgets.error_text_edit, data_load_name)
 
         # grid_lay.setRowStretch(grid_lay.rowCount(), 1)
         grid_lay.setAlignment(Qt.AlignTop)
 
         self.grid_lay_adapter.setLayout(grid_lay)
         self.grid_lay = grid_lay
+        self.error_lay_adapter.setLayout(error_lay)
+        self.error_lay = error_lay
         self.data_name_to_widgets = data_name_to_widgets
 
     def slot_refresh(self, reset=False):
+        log_str = "\n".join(self.data_loader.logs)
+        if self.error_text_edit_data_loader.toPlainText() != log_str:
+            self.error_text_edit_data_loader.setText(log_str)
+            self.error_text_edit_data_loader.moveCursor(QTextCursor.End)
+
         for data_load_name in self.data_loader.data_loads.keys():
             data_load = self.data_loader.data_loads[data_load_name]
             if data_load.name not in self.data_name_to_widgets.keys():
@@ -219,6 +242,11 @@ class NQWindowDataLoader(NQWindow):
                     data_load_widgets.btn_clear.show()
                 else:
                     data_load_widgets.btn_clear.hide()
+
+                log_str = "\n".join(data_load.logs)
+                if data_load_widgets.error_text_edit.toPlainText() != log_str:
+                    data_load_widgets.error_text_edit.setText(log_str)
+                    data_load_widgets.error_text_edit.moveCursor(QTextCursor.End)
 
     def slot_show(self):
         self.slot_refresh(reset=True)

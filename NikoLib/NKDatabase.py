@@ -139,7 +139,6 @@ class NKMySQLConnector(object):
         else:
             return "SELECT " + ", ".join(fields)
 
-
     @staticmethod
     def build_insert_clause(table, fields, values):
         insert_clause = "INSERT INTO `%s`(%s) VALUES (%s)"
@@ -181,11 +180,7 @@ class NKMySQLConnector(object):
         Args:
             str sql_line: where you usually put the sql query line
 
-        Returns:
-            Dict = {
-                "result": List<dict>,
-                "errors": List<str>
-            }
+        Returns: result->List<dict>, errors->List<str>
         """
         connection = None
         cursor = None
@@ -209,10 +204,7 @@ class NKMySQLConnector(object):
             except Exception as e:
                 errors.append(traceback.format_exc())
 
-        return {
-            "result": result,
-            "errors": errors
-        }
+        return result, errors
 
     def write(self, sql_line, sql_data=None):
         """Feed in one WRITE-ONLY SQL line, boom, easy
@@ -221,11 +213,7 @@ class NKMySQLConnector(object):
             str sql_line: One SQL line that WRITE into database
             list sql_data: Data adapts to sql_line
 
-        Returns:
-            Dict = {
-                "result": List<dict>,
-                "errors": List<str>
-            }
+        Returns: result->List<dict>, errors->List<str>
         """
         connection = None
         cursor = None
@@ -250,10 +238,7 @@ class NKMySQLConnector(object):
             except Exception as e:
                 errors.append(traceback.format_exc())
 
-        return {
-            "result": result,
-            "errors": errors
-        }
+        return result, errors
 
     def write_multiple_times(self, sql_line, list_of_sql_data):
         """Feed in one WRITE-ONLY SQL line, and a list of sql_data
@@ -262,11 +247,7 @@ class NKMySQLConnector(object):
             str sql_line: One SQL line that WRITE into database
             list sql_data: Data adapts to sql_line
 
-        Returns:
-            Dict = {
-                "result": List<dict>,
-                "errors": List<str>
-            }
+        Returns: result->List<dict>, errors->List<str>
         """
         connection = None
         cursor = None
@@ -291,10 +272,7 @@ class NKMySQLConnector(object):
             except Exception as e:
                 errors.append(traceback.format_exc())
 
-        return {
-            "result": result,
-            "errors": errors
-        }
+        return result, errors
 
     def write_transaction(self, list_of_sql_lines):
         """Feed in a list of WRITE-ONLY SQL lines, On Error Auto Rollback
@@ -303,11 +281,7 @@ class NKMySQLConnector(object):
             list list_of_sql_lines: SQL lines that WRITE into database
             list list_of_sql_data: SQL Data that adapts to sql_lines
 
-        Returns:
-            Dict = {
-                "result": List<dict>,
-                "errors": List<str>
-            }
+        Returns: result->List<dict>, errors->List<str>
         """
         connection = None
         cursor = None
@@ -345,10 +319,7 @@ class NKMySQLConnector(object):
             except Exception as e:
                 errors.append(traceback.format_exc())
 
-        return {
-            "result": result,
-            "errors": errors
-        }
+        return result, errors
 
     def start(self):
         """Manually Starting the Connection

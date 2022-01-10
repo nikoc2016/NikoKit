@@ -1,6 +1,8 @@
+import datetime
 import traceback
 
 from NikoKit.NikoLib.NKAppDataManager import NKAppDataMixin
+from NikoKit.NikoStd import NKTime
 from NikoKit.NikoStd.NKPrintableMixin import NKPrintableMixin
 
 
@@ -16,20 +18,21 @@ class NKDataLoader(NKAppDataMixin, NKPrintableMixin):
         def __init__(self,
                      name,
                      label,
-                     load_func=None,
-                     reload_func=None,
-                     clear_func=None,
+                     loader=None,
+                     reloader=None,
+                     dumper=None,
                      status=None,
                      updated_datetime=None,
                      enabled=True,
                      auto_load=False,
                      auto_reload=False,
-                     auto_reload_timeout_sec=60):
+                     auto_reload_timeout_sec=60,
+                     logs=None):
             self.name = name
             self.label = label
-            self.load_func = load_func
-            self.reload_func = reload_func
-            self.clear_func = clear_func
+            self.loader = loader
+            self.reloader = reloader
+            self.dumper = dumper
             self.status = status
             if not self.status:
                 self.status = NKDataLoader.UNLOAD
@@ -39,6 +42,9 @@ class NKDataLoader(NKAppDataMixin, NKPrintableMixin):
             self.auto_reload = auto_reload
             self.auto_reload_current_sec = 0
             self.auto_reload_timeout_sec = auto_reload_timeout_sec
+            self.logs = logs
+            if not logs:
+                self.logs = []
 
         def set_unload(self):
             self.status = NKDataLoader.UNLOAD
@@ -58,12 +64,37 @@ class NKDataLoader(NKAppDataMixin, NKPrintableMixin):
         def set_load_error(self):
             self.status = NKDataLoader.LOAD_ERROR
 
-        def not_busy(self):
-            if self.status not in (NKDataLoader.LOADING,
-                                   NKDataLoader.UPDATING,
-                                   NKDataLoader.CLEARING):
-                return True
-            return False
+        def log_message(self, messages):
+            if messages is None:
+                return
+            elif isinstance(messages, str):
+                self.logs.append(NKTime.NKDatetime.datetime_to_str(datetime.datetime.now()) + " " + str(messages))
+            elif isinstance(messages, list):
+                for message in messages:
+                    self.logs.append(NKTime.NKDatetime.datetime_to_str(datetime.datetime.now()) + " " + str(message))
+
+        def execute_callbacks(self, callback):
+            messages = []
+            try:
+                callback_message = callback(self)
+                if callback_message:
+                    messages.extend(callback_message)
+            except Exception as e:
+                messages.append(str(e))
+                messages.append(traceback.format_exc())
+                self.set_load_error()
+
+            self.log_message(messages)
+            return messages
+
+        def load(self):
+            return self.execute_callbacks(self.loader)
+
+        def reload(self):
+            return self.execute_callbacks(self.reloader)
+
+        def clear(self):
+            return self.execute_callbacks(self.dumper)
 
         def check(self):
             messages = []
@@ -77,36 +108,6 @@ class NKDataLoader(NKAppDataMixin, NKPrintableMixin):
                     if self.status == NKDataLoader.LOADED and self.auto_reload:
                         results = self.reload()
                         messages.extend(results)
-            return messages
-
-        def load(self):
-            messages = []
-            if self.not_busy():
-                try:
-                    self.load_func(self)
-                except Exception as e:
-                    messages.append(str(e))
-                    messages.append(traceback.format_exc())
-            return messages
-
-        def reload(self):
-            messages = []
-            if self.not_busy():
-                try:
-                    self.reload_func(self)
-                except Exception as e:
-                    messages.append(str(e))
-                    messages.append(traceback.format_exc())
-            return messages
-
-        def clear(self):
-            messages = []
-            if self.not_busy():
-                try:
-                    self.clear_func(self)
-                except Exception as e:
-                    messages.append(str(e))
-                    messages.append(traceback.format_exc())
             return messages
 
         def get_pref(self):
@@ -124,12 +125,12 @@ class NKDataLoader(NKAppDataMixin, NKPrintableMixin):
     def __init__(self, appdata_mgr, appdata_name="NKDataLoader", *args, **kwargs):
         super(NKDataLoader, self).__init__(appdata_mgr=appdata_mgr, appdata_name=appdata_name, *args, **kwargs)
         self.data_loads = {}
-        self.auto_load_errors = []
+        self.logs = []
 
     def slot_second_elapsed(self):
         for data_load_name, data_load in self.data_loads.items():
-            auto_load_error = data_load.check()
-            self.auto_load_errors.extend(auto_load_error)
+            messages = data_load.check()
+            self.logs.extend(messages)
 
     def add_data_load(self, data_load, skip_appdata_load=False):
         self.data_loads[data_load.name] = data_load

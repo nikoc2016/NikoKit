@@ -16,3 +16,9 @@ def random_datetime(fix_year=None, fix_month=None, fix_day=None):
         new_datetime = random_datetime(fix_year, fix_month, fix_day)
 
     return new_datetime
+
+
+def try_luck(possibility):
+    good_range = int(possibility * 100)
+    luck = random.randint(1, 100)
+    return luck <= good_range

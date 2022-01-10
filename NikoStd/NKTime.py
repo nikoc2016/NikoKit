@@ -1,15 +1,13 @@
 import datetime
 from functools import wraps
 
-from datetime import datetime
-
 
 class NKDatetime:
     DT_FORMAT = '%Y-%m-%d_%H:%M:%S'
 
     @staticmethod
     def now():
-        return datetime.now()
+        return datetime.datetime.now()
 
     @staticmethod
     def datetime_to_str(target_datetime):
@@ -21,7 +19,7 @@ class NKDatetime:
     def str_to_datetime(target_datetime_str):
         if not target_datetime_str:
             return None
-        return datetime.strptime(target_datetime_str, NKDatetime.DT_FORMAT)
+        return datetime.datetime.strptime(target_datetime_str, NKDatetime.DT_FORMAT)
 
     @staticmethod
     def if_datetime_expired(target_datetime, expiration_seconds):
