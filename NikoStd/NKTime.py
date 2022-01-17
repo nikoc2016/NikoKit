@@ -1,5 +1,8 @@
 import datetime
+import calendar
 from functools import wraps
+
+from NikoKit.NikoStd.NKPrint import tprint
 
 
 class NKDatetime:
@@ -27,6 +30,49 @@ class NKDatetime:
         if now_datetime < target_datetime or (now_datetime - target_datetime).seconds < expiration_seconds:
             return True
         return False
+
+
+class NKDate:
+    DT_FORMAT = '%Y-%m-%d'
+
+    @staticmethod
+    def now():
+        return datetime.date.today()
+
+    @staticmethod
+    def date_to_str(target_date):
+        if not target_date:
+            return ""
+        return target_date.strftime(NKDate.DT_FORMAT)
+
+    @staticmethod
+    def str_to_date(target_date_str):
+        if not target_date_str:
+            return None
+        return datetime.datetime.strptime(target_date_str, NKDate.DT_FORMAT).date()
+
+    @staticmethod
+    def if_datetime_expired(target_date, expiration_days):
+        now_date = NKDate.now()
+        if now_date < target_date or (now_date - target_date).days <= expiration_days:
+            return True
+        return False
+
+    @classmethod
+    def month_days_count(cls, year, month):
+        return calendar.monthrange(year, month)[1]
+
+    @classmethod
+    def month_dates_all(cls, year, month):
+        return [datetime.date(year, month, day + 1) for day in range(cls.month_days_count(year, month))]
+
+    @classmethod
+    def month_dates_workdays(cls, year, month):
+        return [month_date for month_date in cls.month_dates_all(year, month) if 0 <= month_date.weekday() <= 4]
+
+    @classmethod
+    def month_dates_weekends(cls, year, month):
+        return [month_date for month_date in cls.month_dates_all(year, month) if 5 <= month_date.weekday() <= 6]
 
 
 class TimeMeasure:
@@ -67,7 +113,7 @@ class TimeMeasure:
             start_time = datetime.datetime.now()
             result = func(*args, **kwargs)
             end_time = datetime.datetime.now()
-            print(func.__name__ + " Execute Time: " + str(end_time - start_time))
+            tprint("Execute time<%s>: %s" % (func.__name__, str(end_time - start_time)))
             return result
 
         return inner

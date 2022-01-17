@@ -5,3 +5,11 @@ def clear_layout(layout):
         widget_to_remove = layout.itemAt(i).widget()
         layout.removeWidget(widget_to_remove)
         widget_to_remove.setParent(None)
+
+
+def color_line(line, color_hex=None, change_line=True):
+    if color_hex:
+        line = '<font color="%s">%s</font>' % (color_hex, line)
+    if change_line:
+        line += "<br/>"
+    return line

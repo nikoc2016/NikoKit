@@ -20,8 +20,8 @@ class NQGhost:
 
 # Note: Remember to register your widget by modifying NQGui.register_all_widgets()
 class NQWidget(NQMixin, QWidget):
-    def __init__(self, w_name="NQBasicWidget", w_title="NQBasicWidget", *args, **kwargs):
-        super(NQWidget, self).__init__(w_name, w_title, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(NQWidget, self).__init__(*args, **kwargs)
 
     def to_ghost(self):
         my_ghost = NQGhost.new_ghost(self.__class__.__name__)

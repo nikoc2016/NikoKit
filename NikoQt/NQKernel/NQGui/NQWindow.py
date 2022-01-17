@@ -35,23 +35,21 @@ class NQWindowManager:
 
 
 class NQWindow(NQWidget):
-    signal_close = Signal(str)         # Window-UUID
-    signal_minimize = Signal(str)      # Window-UUID
-    signal_maximize = Signal(str)      # Window-UUID
-    signal_hide = Signal(str)          # Window-UUID
+    signal_close = Signal(str)  # Window-UUID
+    signal_minimize = Signal(str)  # Window-UUID
+    signal_maximize = Signal(str)  # Window-UUID
+    signal_hide = Signal(str)  # Window-UUID
     signal_done = Signal(str, object)  # Window-UUID, Window-Result
 
     def __init__(self,
-                 w_title="NQWindow",
                  w_width=1024,
                  w_height=768,
                  w_margin_x=0,
                  w_margin_y=0,
                  *args,
                  **kwargs):
-
         # Parent Construction
-        super(NQWindow, self).__init__(w_title=w_title, *args, **kwargs)
+        super(NQWindow, self).__init__(*args, **kwargs)
 
         # Init
         self.init_geo(w_width, w_height, w_margin_x, w_margin_y)
@@ -73,6 +71,8 @@ class NQWindow(NQWidget):
         super(NQWindow, self).construct()
         if self.w_icon:
             self.setWindowIcon(self.w_icon)
+        else:
+            self.setWindowIcon(NQApplication.Runtime.Data.Res.QIcon(NQApplication.Runtime.App.icon_res_name))
         self.setWindowTitle(self.lang(self.w_title))
 
     def slot_show(self):

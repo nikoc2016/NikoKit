@@ -14,6 +14,7 @@ class DefaultSignals(QObject):
 
 class DefaultPath:
     appdata_dir = None  # MyDoc\AppName
+    log_dir = None  # MyDoc\AppName\Logs
 
 
 class DefaultApp:
@@ -25,11 +26,12 @@ class DefaultApp:
     my_dir = ""
     my_file_name = ""
     my_file_ext = ""
-    icon = None
+    use_dummy = False
+    icon_res_name = "NikoKitLogo.png"
 
 
 class DefaultData:
-    pass
+    Res = None
 
 
 class DefaultThreads:
@@ -50,7 +52,11 @@ class DefaultGui:
 
 
 class DefaultDatabase:
-    conn = NKMySQLConnector()
+    Conn = NKMySQLConnector()
+    Create = None
+    Update = None
+    Retrieve = None
+    Delete = None
 
 
 class DefaultRuntime:

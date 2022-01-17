@@ -184,7 +184,7 @@ class NKMySQLConnector(object):
         """
         connection = None
         cursor = None
-        result = None
+        result = []
         errors = []
 
         try:
@@ -217,7 +217,7 @@ class NKMySQLConnector(object):
         """
         connection = None
         cursor = None
-        result = None
+        result = []
         errors = []
 
         try:
@@ -251,7 +251,7 @@ class NKMySQLConnector(object):
         """
         connection = None
         cursor = None
-        result = None
+        result = []
         errors = []
 
         try:
@@ -285,7 +285,7 @@ class NKMySQLConnector(object):
         """
         connection = None
         cursor = None
-        result = None
+        result = []
         errors = []
 
         try:
@@ -465,6 +465,9 @@ class NKMySQLConnector(object):
         Returns:
             list<dict> sql_data_unicode
         """
+        if not sql_data:
+            return sql_data
+
         for line in sql_data:
             for column in line.keys():
                 try:

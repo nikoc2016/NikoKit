@@ -19,7 +19,9 @@ class NQDataManager(QObject):
         pass
 
     class IncludeCondition:
-        pass
+        def __init__(self, **kwargs):
+            for attr_name, attr_value in kwargs.items():
+                self.__dict__[attr_name] = attr_value
 
     class ExcludeCondition(IncludeCondition):
         pass
@@ -62,7 +64,7 @@ class NQDataManager(QObject):
 
     @classmethod
     def is_loaded(cls):
-        return cls.get_all() is None
+        return cls.get_all() is not None
 
     @classmethod
     def get(cls, condition):
@@ -73,6 +75,8 @@ class NQDataManager(QObject):
             condition_match = True
             condition_dict = vars(condition)
             for condition_key, condition_value in condition_dict.items():
+                if condition_key not in data.__dict__.keys():
+                    continue
                 if condition_value and data.__dict__[condition_key] != condition_value:
                     condition_match = False
                     break

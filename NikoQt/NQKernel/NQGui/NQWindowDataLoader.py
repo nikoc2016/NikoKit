@@ -1,9 +1,5 @@
-from PySide2.QtCore import Qt, QObject
-from PySide2.QtGui import QTextCursor
-from PySide2.QtWidgets import QVBoxLayout, QWidget, QHBoxLayout, QPushButton, QGridLayout, QLabel, QCheckBox, QLineEdit, \
-    QSpinBox, QTextEdit, QTabWidget
-
 from NikoKit.NikoLib.NKDataLoader import NKDataLoader
+from NikoKit.NikoQt.NQAdapter import *
 from NikoKit.NikoQt.NQKernel.NQFunctions import clear_layout
 from NikoKit.NikoQt.NQKernel.NQGui.NQWindow import NQWindow
 from NikoKit.NikoStd.NKTime import NKDatetime
@@ -43,8 +39,6 @@ class NQWindowDataLoader(NQWindow):
 
     def __init__(self,
                  data_loader,
-                 w_name="NQWindowDataLoader",
-                 w_title="NQWindowDataLoader",
                  w_width=1024,
                  w_height=500,
                  *args,
@@ -67,9 +61,7 @@ class NQWindowDataLoader(NQWindow):
         self.error_lay_adapter = None
         self.error_text_edit_data_loader = None
 
-        super(NQWindowDataLoader, self).__init__(w_name=w_name,
-                                                 w_title=w_title,
-                                                 w_width=w_width,
+        super(NQWindowDataLoader, self).__init__(w_width=w_width,
                                                  w_height=w_height,
                                                  *args,
                                                  **kwargs)
@@ -161,6 +153,7 @@ class NQWindowDataLoader(NQWindow):
 
             error_text_edit = QTextEdit()
             error_text_edit.setReadOnly(True)
+            error_text_edit.setLineWrapMode(QTextEdit.NoWrap)
 
             dl_widgets = self.DataLoadWidgets(
                 data_load_name=data_load_name,
@@ -249,6 +242,7 @@ class NQWindowDataLoader(NQWindow):
                     data_load_widgets.error_text_edit.moveCursor(QTextCursor.End)
 
     def slot_show(self):
+        self.data_loader.load_appdata()
         self.slot_refresh(reset=True)
         self.show()
 
@@ -268,7 +262,7 @@ class NQWindowDataLoader(NQWindow):
 
     def slot_apply(self):
         self.apply_data_load_values(self.sender().data_load_name)
-        self.slot_save_appdata()
+        self.data_loader.save_appdata()
 
     def apply_data_load_values(self, data_load_name):
         dl_widgets = self.data_name_to_widgets[data_load_name]
@@ -277,9 +271,6 @@ class NQWindowDataLoader(NQWindow):
         dl.auto_load = dl_widgets.checkbox_auto_load.isChecked()
         dl.auto_reload = dl_widgets.checkbox_auto_update.isChecked()
         dl.auto_reload_timeout_sec = dl_widgets.spinbox_auto_update_time_gap.value()
-
-    def slot_save_appdata(self):
-        self.data_loader.save_appdata(self.data_loader.extract_appdata())
 
     def slot_load_all(self):
         for data_load_name in self.data_loader.data_loads.keys():
@@ -297,7 +288,7 @@ class NQWindowDataLoader(NQWindow):
     def slot_apply_all(self):
         for dl_name in self.data_name_to_widgets.keys():
             self.apply_data_load_values(dl_name)
-        self.slot_save_appdata()
+        self.data_loader.save_data()
 
     def closeEvent(self, event):
         event.ignore()

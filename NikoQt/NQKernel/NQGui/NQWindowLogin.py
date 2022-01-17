@@ -16,12 +16,11 @@ class NQWindowLogin(NKAppDataMixin, NQWindow):
 
     def __init__(self,
                  login_validator,
-                 w_name="NQWindowLogin",
-                 w_title="NQWindowLogin",
                  w_width=300,
                  w_height=100,
                  appdata_name="Login",
                  appdata_mgr=None,
+                 ignore_auto_login=False,
                  require_username=True,
                  require_password=True,
                  allow_remember_me=True,
@@ -30,6 +29,7 @@ class NQWindowLogin(NKAppDataMixin, NQWindow):
                  **kwargs):
         # Private Storage
         self.login_validator = login_validator
+        self.ignore_auto_login = ignore_auto_login
         self.require_username = require_username
         self.require_password = require_password
         self.allow_remember_me = allow_remember_me
@@ -50,9 +50,7 @@ class NQWindowLogin(NKAppDataMixin, NQWindow):
         if not appdata_mgr:
             appdata_mgr = NQApplication.Runtime.Service.AppDataMgr
 
-        super(NQWindowLogin, self).__init__(w_name=w_name,
-                                            w_title=w_title,
-                                            w_width=w_width,
+        super(NQWindowLogin, self).__init__(w_width=w_width,
                                             w_height=w_height,
                                             appdata_name=appdata_name,
                                             appdata_mgr=appdata_mgr,
@@ -60,10 +58,9 @@ class NQWindowLogin(NKAppDataMixin, NQWindow):
                                             **kwargs)
 
     def show(self):
-        appdata = self.load_appdata()
-        self.apply_appdata(self.load_appdata())
+        self.load_appdata()
         super(NQWindowLogin, self).show()
-        if appdata["auto_login"]:
+        if not self.ignore_auto_login and self.extract_appdata()["auto_login"]:
             self.slot_login_button_clicked()
 
     def construct(self):
@@ -126,9 +123,10 @@ class NQWindowLogin(NKAppDataMixin, NQWindow):
     def slot_login_button_clicked(self):
         username, password = self.get_username_password()
         try:
-            if self.login_validator(username, password):
-                self.save_appdata(self.extract_appdata())
-                self.signal_done.emit(self.w_id, (username, password))
+            user_token = self.login_validator(username, password)
+            if user_token:
+                self.save_appdata()
+                self.signal_done.emit(self.w_id, user_token)
                 self.close()
             else:
                 self.message_label.setText(self.lang("username", "or", "password", "incorrect"))

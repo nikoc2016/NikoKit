@@ -1,7 +1,5 @@
 import sys
 import os.path as p
-
-import GIconPack
 from NikoKit.NikoQt.NQApplication.NQRuntimeInterfaces import DefaultRuntime
 from NikoKit.NikoQt.NQAdapter import *
 
@@ -22,6 +20,16 @@ def load_basic():
 
     if not Runtime.Path.appdata_dir:
         Runtime.Path.appdata_dir = p.join(p.expanduser('~'), 'Documents', 'NQAppdata')
+
+
+def load_service_nk_logger(log_dir):
+    from NikoKit.NikoLib.NKLogger import NKLogger
+    Runtime.Service.NKLogger = NKLogger(log_dir=log_dir)
+
+
+def load_service_nq_resource(res_patch=None):
+    from NikoKit.NikoQt.NQKernel.NQComponent.NQResource import NQResource
+    Runtime.Data.Res = NQResource(res_patch)
 
 
 def load_service_nk_language():
@@ -50,7 +58,8 @@ def load_service_data_loader():
     Runtime.Service.DataLoader = NKDataLoader(appdata_mgr=Runtime.Service.AppDataMgr)
     Runtime.Signals.second_passed.connect(Runtime.Service.DataLoader.slot_second_elapsed, Qt.QueuedConnection)
     from NikoKit.NikoQt.NQKernel.NQGui.NQWindowDataLoader import NQWindowDataLoader
-    Runtime.Gui.WinDataLoader = NQWindowDataLoader(w_icon=Runtime.App.icon, data_loader=Runtime.Service.DataLoader)
+    Runtime.Gui.WinDataLoader = NQWindowDataLoader(w_icon=Runtime.Data.Res.QIcon(Runtime.App.icon_res_name),
+                                                   data_loader=Runtime.Service.DataLoader)
     Runtime.Signals.tick_passed.connect(Runtime.Gui.WinDataLoader.slot_refresh)
 
 

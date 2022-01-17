@@ -98,7 +98,7 @@ class NKDataLoader(NKAppDataMixin, NKPrintableMixin):
 
         def check(self):
             messages = []
-            if self.status != NKDataLoader.LOADED and self.auto_load:
+            if self.auto_load and self.status == NKDataLoader.UNLOAD:
                 results = self.load()
                 messages.extend(results)
             else:
@@ -135,12 +135,12 @@ class NKDataLoader(NKAppDataMixin, NKPrintableMixin):
     def add_data_load(self, data_load, skip_appdata_load=False):
         self.data_loads[data_load.name] = data_load
         if not skip_appdata_load:
-            self.apply_appdata(self.load_appdata())
+            self.load_appdata()
 
     def add_data_loads(self, data_loads):
         for data_load in data_loads:
             self.add_data_load(data_load, skip_appdata_load=True)
-        self.apply_appdata(self.load_appdata())
+        self.load_appdata()
 
     def set_data_load_enabled(self, name, enabled):
         self.data_loads[name].enabled = enabled

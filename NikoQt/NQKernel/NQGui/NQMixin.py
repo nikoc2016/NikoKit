@@ -6,11 +6,15 @@ from NikoKit.NikoStd.NKPrintableMixin import NKPrintableMixin
 
 
 class NQMixin(NKPrintableMixin):
-    def __init__(self, w_name="NQMixin", w_title="NQMixin", w_use_lang=True, w_icon=None, *args, **kwargs):
+    def __init__(self, w_name=None, w_title=None, w_use_lang=True, w_icon=None, *args, **kwargs):
         super(NQMixin, self).__init__(*args, **kwargs)
         self.w_id = str(uuid4())
         self.w_name = w_name
+        if not self.w_name:
+            self.w_name = self.__class__.__name__
         self.w_title = w_title
+        if not self.w_title:
+            self.w_title = self.__class__.__name__
         self.w_use_lang = w_use_lang
         self.w_icon = w_icon
 

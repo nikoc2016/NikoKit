@@ -27,13 +27,14 @@ def get_file_from_base64(base_64):
         return io.StringIO(base64.decodestring(base_64))
 
 
-def scout(path):
-    path = p.normpath(path)
-    if p.splitext(path)[1]:
-        target_dir = p.dirname(path)
-    else:
-        target_dir = path
-    try:
-        os.makedirs(target_dir)
-    except:
-        pass
+def scout(*target_paths):
+    for target_path in target_paths:
+        target_path = p.normpath(target_path)
+        if p.splitext(target_path)[1]:
+            target_dir = p.dirname(target_path)
+        else:
+            target_dir = target_path
+        try:
+            os.makedirs(target_dir)
+        except:
+            pass

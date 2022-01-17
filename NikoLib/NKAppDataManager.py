@@ -21,10 +21,10 @@ class NKAppDataMixin:
         appdata = self.new_appdata()
         if local_appdata:
             appdata.update(local_appdata)
-        return appdata
+        self.apply_appdata(appdata)
 
-    def save_appdata(self, appdata):
-        self.appdata_mgr.set(self.appdata_name, appdata)
+    def save_appdata(self):
+        self.appdata_mgr.set(self.appdata_name, self.extract_appdata())
         self.appdata_mgr.save(self.appdata_name)
 
     def extract_appdata(self):

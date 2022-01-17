@@ -32,8 +32,6 @@ class NQWidgetLaunchPad(NQWidget):
             self.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
 
     def __init__(self,
-                 w_name="NQWidgetLaunchPad",
-                 w_title="NQWidgetLaunchPad",
                  launch_btn_size=150,
                  launch_btn_col_count=3,
                  *args,
@@ -46,7 +44,7 @@ class NQWidgetLaunchPad(NQWidget):
         self.main_lay = None
         self.launch_targets = {}
 
-        super(NQWidgetLaunchPad, self).__init__(w_name, w_title, *args, **kwargs)
+        super(NQWidgetLaunchPad, self).__init__(*args, **kwargs)
 
     def construct(self):
         main_lay = QGridLayout()
@@ -82,8 +80,12 @@ class NQWidgetLaunchPad(NQWidget):
         self.render_buttons()
 
     def set_launch_target_enabled(self, value, enabled):
-        self.launch_targets[value].enabled = enabled
-        self.render_buttons()
+        try:
+            self.launch_targets[value].enabled = enabled
+            self.render_buttons()
+            return True
+        except:
+            return False
 
     def remove_launch_target(self, value, skip_render=False):
         del self.launch_targets[value]
