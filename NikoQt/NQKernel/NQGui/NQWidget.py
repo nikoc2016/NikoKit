@@ -5,6 +5,9 @@ NQWidgetRegistry = set()
 
 
 class NQGhost:
+    def __init__(self, *args, **kwargs):
+        super(NQGhost, self).__init__(*args, **kwargs)
+
     @classmethod
     def new_ghost(cls, w_type_str):
         return {
@@ -16,12 +19,6 @@ class NQGhost:
         for NQWidgetClass in NQWidgetRegistry:
             if NQWidgetClass.__name__ == ghost["w_type_str"]:
                 return NQWidgetClass.from_ghost(ghost)
-
-
-# Note: Remember to register your widget by modifying NQGui.register_all_widgets()
-class NQWidget(NQMixin, QWidget):
-    def __init__(self, *args, **kwargs):
-        super(NQWidget, self).__init__(*args, **kwargs)
 
     def to_ghost(self):
         my_ghost = NQGhost.new_ghost(self.__class__.__name__)
@@ -45,3 +42,9 @@ class NQWidget(NQMixin, QWidget):
             w_use_lang=ghost["w_use_lang"],
             # Call NQGhost.build(child_ghost) to append children
         )
+
+
+# Note: Remember to register your widget by modifying NQGui.register_all_widgets()
+class NQWidget(NQMixin, QWidget):
+    def __init__(self, *args, **kwargs):
+        super(NQWidget, self).__init__(*args, **kwargs)

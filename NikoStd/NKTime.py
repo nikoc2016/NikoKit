@@ -74,6 +74,16 @@ class NKDate:
     def month_dates_weekends(cls, year, month):
         return [month_date for month_date in cls.month_dates_all(year, month) if 5 <= month_date.weekday() <= 6]
 
+    @classmethod
+    def gap_dates(cls, *dates):
+        gap_dates = []
+        sort_dates = sorted(dates)
+        gap_date = sort_dates[0]
+        while gap_date <= sort_dates[-1]:
+            gap_dates.append(gap_date)
+            gap_date += datetime.timedelta(days=1)
+        return gap_dates
+
 
 class TimeMeasure:
     def __init__(self):

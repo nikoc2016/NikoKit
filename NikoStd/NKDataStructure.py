@@ -2,8 +2,8 @@ from NikoKit.NikoStd.NKPrintableMixin import NKPrintableMixin
 
 
 class NKDataStructure(NKPrintableMixin):
-    def __init__(self):
-        super(NKDataStructure, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(NKDataStructure, self).__init__(*args, **kwargs)
 
     def p_key(self):
         return None
@@ -18,8 +18,8 @@ class NKDataStructure(NKPrintableMixin):
 
     @classmethod
     def get_dummy(cls, *args, **kwargs):
-        pass
+        return cls()
 
     @classmethod
     def corrupt(cls, data, possibility, *args, **kwargs):
-        pass
+        return cls()

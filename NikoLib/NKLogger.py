@@ -10,42 +10,11 @@ STD_ERR = "STD_ERR"
 
 
 class NKLog(NKPrintableMixin):
-    def __init__(self, log_datetime=None, log_context=None, log_type=None):
+    def __init__(self, log_datetime_str=None, log_context=None, log_type=None):
         super(NKLog, self).__init__()
-        self.log_datetime = log_datetime
+        self.log_datetime_str = log_datetime_str
         self.log_context = log_context
         self.log_type = log_type
-
-    def get_formatted(self):
-        head_n = False
-        tail_n = False
-        target_str = self.log_context
-        datetime_str = NKDatetime.datetime_to_str(self.log_datetime) + " "
-
-        if target_str is None:
-            return datetime_str + "None"
-        if not isinstance(target_str, str):
-            target_str = repr(target_str)
-
-        if target_str.startswith("\n"):
-            head_n = True
-            target_str = target_str[1:]
-
-        if target_str.endswith("\n"):
-            tail_n = True
-            target_str = target_str[:-1]
-
-        if target_str.strip():
-            target_str = target_str.replace("\n", "\n" + (" " * len(datetime_str)))
-            target_str = datetime_str + target_str
-
-        if head_n:
-            target_str = "\n" + target_str
-
-        if tail_n:
-            target_str = target_str + "\n"
-
-        return target_str
 
 
 class NKLoggerBuffer:
@@ -55,7 +24,17 @@ class NKLoggerBuffer:
         self.log_type = log_type
 
     def write(self, message):
-        new_log = NKLog(log_datetime=NKDatetime.now(), log_context=message, log_type=self.log_type)
+        now_datetime_str = NKDatetime.datetime_to_str(NKDatetime.now())
+        datetime_log = None
+
+        if now_datetime_str not in self.logger.logged_datetime_hints[self.log_type]:
+            datetime_log = NKLog(log_datetime_str=now_datetime_str,
+                                 log_context=now_datetime_str + "\n",
+                                 log_type=self.log_type)
+            self.logger.logs.append(datetime_log)
+            self.logger.logged_datetime_hints[self.log_type].add(now_datetime_str)
+
+        new_log = NKLog(log_datetime_str=now_datetime_str, log_context=message, log_type=self.log_type)
         self.logger.logs.append(new_log)
 
         try:
@@ -68,7 +47,10 @@ class NKLoggerBuffer:
             if file_path:
                 NKFileSystem.scout(file_path)
                 with open(file_path, "a") as f:
-                    f.write(new_log.get_formatted())
+                    if datetime_log:
+                        f.write(datetime_log.log_context)
+                    if new_log:
+                        f.write(new_log.log_context)
         except:
             pass
 
@@ -82,6 +64,11 @@ class NKLoggerBuffer:
 class NKLogger:
     def __init__(self, log_dir):
         self.logs = []
+        self.logged_datetime_hints = {
+            STD_OUT: set(),
+            STD_ERR: set(),
+        }
+
         self.default_terminals = {
             STD_OUT: sys.stdout,
             STD_ERR: sys.stderr,

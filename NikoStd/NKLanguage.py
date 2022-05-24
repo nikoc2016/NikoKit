@@ -16,10 +16,14 @@ class NKLanguage:
                 "UNGROUPED": u"未分组",
                 "valid": u"合法",
                 "invalid": u"非法",
+                "analysis": u"分析",
                 "day": u"日",
                 "week": u"周",
                 "month": u"月",
                 "year": u"年",
+                "start": u"开始",
+                "end": u"结束",
+                "name": u"名字",
                 "error": u"错误",
                 "test": u"测试",
                 "hello": u"你好",
@@ -81,6 +85,12 @@ class NKLanguage:
                 "i_understand": u"我知道了",
                 "execute": "执行",
                 "console": "控制台",
+                "file": "文件",
+                "send": "发送",
+                "ctime": "修改时间",
+                "atime": "访问时间",
+                "size": "大小",
+                "path": "路径"
             }
         }
         self.chosen_language = NKConst.ZH_CN

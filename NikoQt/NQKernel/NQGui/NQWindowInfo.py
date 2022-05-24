@@ -7,9 +7,6 @@ class NQWindowInfo(NQWindow):
         # Switches
         self.auto_change_line = auto_change_line
 
-        # Data
-        self.info_string = info_string
-
         # GUI Component
         self.main_lay = None
         self.message_text_edit = None
@@ -18,6 +15,7 @@ class NQWindowInfo(NQWindow):
         super(NQWindowInfo, self).__init__(*args, **kwargs)
 
         self.slot_show()
+        self.set_info(info_string)
 
     def construct(self):
         super(NQWindowInfo, self).construct()
@@ -26,7 +24,6 @@ class NQWindowInfo(NQWindow):
         message_text_edit.setReadOnly(True)
         if not self.auto_change_line:
             message_text_edit.setLineWrapMode(QTextEdit.NoWrap)
-        message_text_edit.setText(self.info_string)
         button_lay = QHBoxLayout()
         button_lay.setAlignment(Qt.AlignHCenter)
         understood_button = QPushButton(self.lang("i_understand"))
@@ -44,3 +41,6 @@ class NQWindowInfo(NQWindow):
     def connect_signals(self):
         super(NQWindowInfo, self).connect_signals()
         self.understood_button.clicked.connect(self.slot_close)
+
+    def set_info(self, info_string):
+        self.message_text_edit.setText(info_string)
