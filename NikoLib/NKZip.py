@@ -1,13 +1,16 @@
 import os
 import os.path as p
+import time
 import uuid
+from time import sleep
+
 from NikoKit.NikoStd import NKLaunch
 from NikoKit.NikoStd.NKDataStructure import NKDataStructure
 
-PATH_7ZA_EXE = p.normpath(p.join(p.dirname(__file__), "bin", "7za.exe"))
+PATH_7ZA_EXE = p.normpath(p.join(p.dirname(__file__), "bin", "7z.exe"))
 
 
-class CompressProcess(NKDataStructure):
+class SevenZipProcess(NKDataStructure):
     """
     Features:
         Manage compress process and provide functions to check status
@@ -25,9 +28,9 @@ class CompressProcess(NKDataStructure):
         info()                    {"std_out": [Lines], "std_err": [Lines]}
     """
 
-    def __init__(self, compress_id="", popen_proc_obj=None, std_out=None, std_err=None, *args, **kwargs):
-        super(CompressProcess, self).__init__(*args, **kwargs)
-        self.compress_id = compress_id
+    def __init__(self, transaction_id="", popen_proc_obj=None, std_out=None, std_err=None, *args, **kwargs):
+        super(SevenZipProcess, self).__init__(*args, **kwargs)
+        self.transaction_id = transaction_id
         self.popen_proc_obj = popen_proc_obj
         if std_out:
             self.std_out = std_out
@@ -48,7 +51,7 @@ class CompressProcess(NKDataStructure):
         return self.popen_proc_obj.poll()
 
     # SYNC LAG WARNING
-    # Recommend: Use this only when is_finished triggered
+    # Recommend: Use this only when is_finished() triggered
     # Advance: Use this in a thread
     def info(self):
         self.cache_std_out()
@@ -62,19 +65,28 @@ class CompressProcess(NKDataStructure):
     def cache_std_out(self):
         lines = self.popen_proc_obj.stdout.readlines()
         for line in lines:
-            line = line.decode()
+            try:
+                line = line.decode()
+            except:
+                line = line.decode("gbk")
+
             if line != os.linesep:
-                self.std_out.append(line.replace(os.linesep, ""))
+                line = line.replace(os.linesep, "")
+                self.std_out.append(line)
 
     def cache_std_err(self):
         lines = self.popen_proc_obj.stderr.readlines()
         for line in lines:
-            line = line.decode()
+            try:
+                line = line.decode()
+            except:
+                line = line.decode("gbk")
             if line != os.linesep:
-                self.std_err.append(line.replace(os.linesep, ""))
+                line = line.replace(os.linesep, "")
+                self.std_err.append(line)
 
     def p_key(self):
-        return self.compress_id
+        return self.transaction_id
 
 
 def compress(compress_target, zip_path, zip_type="7z", password="", hide_names=True):
@@ -87,7 +99,7 @@ def compress(compress_target, zip_path, zip_type="7z", password="", hide_names=T
         hide_names: only works with 7z
 
     Returns:
-        CompressProcess object
+        SevenZipProcess object
     """
     command = ["a", zip_path, "-t" + str(zip_type)]
     if password:
@@ -107,7 +119,7 @@ def extract(zip_path, extract_dir, password=""):
         password: zip password
 
     Returns:
-        CompressProcess object
+        SevenZipProcess object
     """
     command = ["x", zip_path]
     if password:
@@ -117,27 +129,116 @@ def extract(zip_path, extract_dir, password=""):
     return free_7z_command(command)
 
 
+def extract_try(zip_path, extract_dir, password_list=None, password_generator=None):
+    """
+    Args:
+        zip_path:           The extract target zip
+        extract_dir:        The folder which files extract to
+        password_list:      str password OR list<str> password
+        password_generator: def generator(zip_file_path) -> list OR str
+
+    Returns:
+        SevenZipProcess, None: (Success OR Fail) task, NO password found
+        None, None:            (Encrypted)       task, NO password found
+        SevenZipProcess, str:  (Success OR Fail) task,    password found
+
+    SYNC LAG WARNING
+        This function will RETURN when extraction is FINISHED.
+        Advance: Use this in a thread
+    """
+    if not is_encrypted(zip_path):
+        extract_process = extract(zip_path=zip_path, extract_dir=extract_dir)
+        while not extract_process.is_finished():
+            pass
+        extract_process.info()
+        return extract_process, None
+
+    brute_force_list = []
+    if isinstance(password_list, list):
+        brute_force_list.extend(password_list)
+    elif isinstance(password_list, str):
+        brute_force_list.append(password_list)
+    if callable(password_generator):
+        generated_password = password_generator(zip_path)
+        if isinstance(generated_password, list):
+            brute_force_list.extend(generated_password)
+        elif isinstance(generated_password, str):
+            brute_force_list.append(generated_password)
+
+    for try_password in brute_force_list:
+        extract_process = extract(zip_path=zip_path, extract_dir=extract_dir, password=try_password)
+        while not extract_process.is_finished():
+            pass
+
+        wrong_password = False
+        for line in extract_process.info()["std_err"]:
+            if "Wrong password" in line:
+                wrong_password = True
+                break
+
+        if not wrong_password:
+            return extract_process, try_password
+
+    return None, None
+
+
+def is_encrypted(zip_path):
+    check_process = free_7z_command(["l", "-slt", zip_path, "-p" + str(uuid.uuid4())])
+    while not check_process.is_finished():
+        pass
+
+    encrypted = False
+    check_process.info()
+    for line in check_process.std_out:
+        if line == "Encrypted = +":
+            encrypted = True
+            break
+    for line in check_process.std_err:
+        if "Wrong password" in line:
+            encrypted = True
+            break
+    return encrypted
+
+
 def free_7z_command(parameter_list):
     """
     Args:
         parameter_list: ex. ["x", "C:\a.exe", "-p123", "C:\a_Folder"]
 
     Returns:
-        CompressProcess object
+        SevenZipProcess object
     """
     if not isinstance(parameter_list, list):
         raise Exception("Parameters must be a list")
     command = [PATH_7ZA_EXE] + parameter_list
     popen_process = NKLaunch.run_pipe(command=command)
-    return CompressProcess(compress_id=str(uuid.uuid4()), popen_proc_obj=popen_process)
+    return SevenZipProcess(transaction_id=str(uuid.uuid4()), popen_proc_obj=popen_process)
 
 
 # cp = compress(compress_target=r"D:\NKZipTest\toPack", zip_path=r"D:\NKZipTest\a.7z", password="123")
 # while not cp.is_finished():
 #     time.sleep(1)
 # print(cp.info())
-#
+
+
 # ep = extract(zip_path=r"D:\NKZipTest\a.7z", extract_dir=r"D:\NKZipTest\extracted", password="123")
 # while not ep.is_finished():
 #     time.sleep(1)
 # print(ep.info())
+
+
+# def interesting(file_name):
+#     return ["abc", "123"]
+#
+#
+# ep, password = extract_try(zip_path=r"D:\NKZipTest\plain.rar",
+#                            extract_dir=r"D:\NKZipTest\extracted",
+#                            password_list=["124", "155"],
+#                            password_generator=interesting)
+# print(password)
+
+
+# result = free_7z_command(["x", r"D:\NKZipTest\big_123.7z", "-p12345"])
+# while not result.is_finished():
+#     time.sleep(1)
+# print(result.info())
