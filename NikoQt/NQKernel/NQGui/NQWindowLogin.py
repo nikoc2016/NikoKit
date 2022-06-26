@@ -25,6 +25,7 @@ class NQWindowLogin(NKAppDataMixin, NQWindow):
                  require_password=True,
                  allow_remember_me=True,
                  allow_auto_login=True,
+                 success_callback=None,
                  *args,
                  **kwargs):
         # Private Storage
@@ -34,6 +35,7 @@ class NQWindowLogin(NKAppDataMixin, NQWindow):
         self.require_password = require_password
         self.allow_remember_me = allow_remember_me
         self.allow_auto_login = allow_auto_login
+        self.success_callback = success_callback
 
         # GUI Component
         self.main_lay = None
@@ -122,16 +124,18 @@ class NQWindowLogin(NKAppDataMixin, NQWindow):
 
     def slot_login_button_clicked(self):
         username, password = self.get_username_password()
-        try:
-            user_token = self.login_validator(username, password)
-            if user_token:
-                self.save_appdata()
-                self.signal_done.emit(self.w_id, user_token)
-                self.close()
-            else:
-                self.message_label.setText(self.lang("username", "or", "password", "incorrect"))
-        except Exception as e:
-            self.message_label.setText("validator failure:" + str(e))
+        # try:
+        user_token = self.login_validator(username, password)
+        if user_token:
+            self.save_appdata()
+            self.signal_done.emit(self.w_id, user_token)
+            if self.success_callback:
+                self.success_callback()
+            self.close()
+        else:
+            self.message_label.setText(self.lang("username", "or", "password", "incorrect"))
+        # except Exception as e:
+        #     self.message_label.setText("validator failure:" + str(e))
 
     def get_username_password(self):
         return self.username_line_edit.text(), self.password_line_edit.text()

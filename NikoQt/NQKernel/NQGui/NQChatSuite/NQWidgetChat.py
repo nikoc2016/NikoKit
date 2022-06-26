@@ -1,8 +1,8 @@
 from NikoKit.NikoLib.NKChat import NKChatUser, NKChatConversation, NKChatMessage
 from NikoKit.NikoQt.NQAdapter import *
-from NikoKit.NikoQt.NQKernel.NQGui.NQChat.NQWidgetChatFriendList import NQWidgetChatFriendList
-from NikoKit.NikoQt.NQKernel.NQGui.NQChat.NQWidgetChatHistory import NQWidgetChatHistory
-from NikoKit.NikoQt.NQKernel.NQGui.NQChat.NQWidgetChatInputPanel import NQWidgetChatInputPanel
+from NikoKit.NikoQt.NQKernel.NQGui.NQChatSuite.NQWidgetChatFriendList import NQWidgetChatFriendList
+from NikoKit.NikoQt.NQKernel.NQGui.NQChatSuite.NQWidgetChatHistory import NQWidgetChatHistory
+from NikoKit.NikoQt.NQKernel.NQGui.NQChatSuite.NQWidgetChatInputPanel import NQWidgetChatInputPanel
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
 
 

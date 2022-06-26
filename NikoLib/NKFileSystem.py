@@ -3,8 +3,27 @@ import hashlib
 import io
 import os
 import os.path as p
+import shutil
+import sys
 
 from NikoKit.NikoStd.NKDataStructure import NKDataStructure
+
+
+# Call with __file__ and it will work
+def get_exe_info(entry_py_path):
+    # Get Exe or Py Info
+    if getattr(sys, 'frozen', False):
+        compiled = True
+        my_dir = p.dirname(sys.executable)
+        my_file_name = p.splitext(p.basename(sys.executable))[0]
+        my_file_ext = p.splitext(p.basename(sys.executable))[1]
+    else:
+        compiled = False
+        my_dir = p.dirname(p.abspath(entry_py_path))
+        my_file_name = p.splitext(p.basename(entry_py_path))[0]
+        my_file_ext = p.splitext(p.basename(entry_py_path))[1]
+
+    return compiled, my_dir, my_file_name, my_file_ext
 
 
 def get_md5(file_path):
@@ -29,6 +48,21 @@ def get_file_from_base64(base_64):
         return io.StringIO(base64.decodestring(base_64))
 
 
+def write_file_from_base64(file_path, base_64):
+    try:
+        os.makedirs(p.dirname(file_path))
+    except:
+        pass
+
+    try:
+        os.remove(file_path)
+    except:
+        pass
+
+    with open(file_path, "wb") as f:
+        f.write(base64.b64decode(base_64))
+
+
 def scout(*target_paths):
     for target_path in target_paths:
         target_path = p.normpath(target_path)
@@ -40,6 +74,18 @@ def scout(*target_paths):
             os.makedirs(target_dir)
         except:
             pass
+
+
+def delete_try(url):
+    try:
+        os.remove(url)
+    except:
+        pass
+
+    try:
+        shutil.rmtree(url)
+    except:
+        pass
 
 
 class NKFile(NKDataStructure):

@@ -126,27 +126,28 @@ class NKMySQLConnector(object):
 
     @staticmethod
     def build_select_clause(fields):
-        """Feed in the Sql Data and no binaries shall exists
-
-        Args:
-            list<dict> sql_data_binary
-
-        Returns:
-            list<dict> sql_data_unicode
-        """
         if not fields:
             return "SELECT * "
         else:
             return "SELECT " + ", ".join(fields)
 
     @staticmethod
-    def build_insert_clause(table, fields, values):
-        insert_clause = "INSERT INTO `%s`(%s) VALUES (%s)"
+    def build_insert_clause(table, fields, values, on_duplicate_ignore_fields=None):
+        insert_clause = "INSERT INTO `%s`(%s) VALUES (%s) "
         fields_str = ", ".join([str(field) for field in fields])
         values_str = ", ".join([str(value) for value in values])
-        return insert_clause % (table,
-                                fields_str,
-                                values_str)
+        if on_duplicate_ignore_fields:
+            insert_clause += "ON DUPLICATE KEY UPDATE %s"
+            mapping_fields = [str(field) for field in fields if field not in on_duplicate_ignore_fields]
+            mapping_fields_str = ", ".join(["%s = VALUES(%s)" % (field, field) for field in mapping_fields])
+            return insert_clause % (table,
+                                    fields_str,
+                                    values_str,
+                                    mapping_fields_str)
+        else:
+            return insert_clause % (table,
+                                    fields_str,
+                                    values_str)
 
     @staticmethod
     def build_update_clause(table, fields, where_clause):
@@ -159,10 +160,14 @@ class NKMySQLConnector(object):
         )
 
     @staticmethod
+    def build_from_clause(table):
+        return " FROM %s " % str(table)
+
+    @staticmethod
     def build_order_clause(sort_field, sort_asc):
         order_clause = ""
         if sort_field:
-            order_clause += " ORDER BY `%s`" % (sort_field,)
+            order_clause += " ORDER BY %s" % (sort_field,)
             if not sort_asc:
                 order_clause += " DESC "
         return order_clause

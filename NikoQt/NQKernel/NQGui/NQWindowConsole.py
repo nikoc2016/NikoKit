@@ -4,6 +4,8 @@ from NikoKit.NikoQt import NQApplication
 from NikoKit.NikoQt.NQAdapter import *
 from NikoKit.NikoLib import NKLogger
 from NikoKit.NikoQt.NQKernel import NQFunctions
+from NikoKit.NikoQt.NQKernel.NQGui.NQWidgetConsoleLineEdit import NQWidgetConsoleLineEdit
+from NikoKit.NikoQt.NQKernel.NQGui.NQWidgetConsoleTextEdit import NQWidgetConsoleTextEdit
 from NikoKit.NikoQt.NQKernel.NQGui.NQWindow import NQWindow
 from NikoKit.NikoStd import NKConst
 
@@ -12,11 +14,8 @@ class NQWindowConsole(NQWindow):
     def __init__(self, allow_execute=False, *args, **kwargs):
         # Variable
         self.allow_execute = allow_execute
-        self.log_records_count = 0
-        self.exec_dict = {"Runtime": NQApplication.Runtime}
-
-        # Switches
-        self.enable_auto_scroll = True
+        self.cmd_history = [""]
+        self.cmd_ptr = 0
 
         # GUI Components
         self.main_lay = None
@@ -35,10 +34,8 @@ class NQWindowConsole(NQWindow):
         main_lay = QVBoxLayout()
         command_lay = QHBoxLayout()
 
-        log_text_edit = QTextEdit()
-        log_text_edit.setLineWrapMode(QTextEdit.NoWrap)
-        log_text_edit.setReadOnly(True)
-        command_line_edit = QLineEdit()
+        log_text_edit = NQWidgetConsoleTextEdit()
+        command_line_edit = NQWidgetConsoleLineEdit()
         execute_button = QPushButton(self.lang("execute"))
 
         main_lay.addWidget(log_text_edit)
@@ -63,7 +60,9 @@ class NQWindowConsole(NQWindow):
         super(NQWindowConsole, self).connect_signals()
         self.execute_button.clicked.connect(self.slot_execute)
         self.command_line_edit.returnPressed.connect(self.slot_execute)
-        NQApplication.Runtime.Signals.tick_passed.connect(self.slot_refresh)
+        self.command_line_edit.upPressed.connect(self.slot_previous_command)
+        self.command_line_edit.downPressed.connect(self.slot_next_command)
+        NQApplication.Runtime.Signals.tick_passed.connect(self.load_logs)
 
     def slot_clear(self):
         self.slot_clear_command_line()
@@ -75,40 +74,48 @@ class NQWindowConsole(NQWindow):
     def slot_clear_log(self):
         self.log_text_edit.setHtml("")
 
-    def slot_refresh(self):
-        self.auto_scroll_check()
-        if self.isVisible() and self.enable_auto_scroll:
-            self.load_logs()
-        self.auto_scroll()
+    def slot_clear_history(self):
+        self.cmd_history = [""]
+        self.cmd_ptr = 0
 
-    def scroll_bar_at_bottom(self):
-        scroll_bar = self.log_text_edit.verticalScrollBar()
-        is_at_bottom = scroll_bar.value() >= scroll_bar.maximum() - 4
-        return is_at_bottom
+    def slot_execute(self):
+        cmd = self.command_line_edit.text()
+        self.cmd_history[-1] = cmd
+        self.cmd_history.append("")
+        self.cmd_ptr = len(self.cmd_history) - 1
+        self.run_command(cmd)
 
-    def auto_scroll_check(self):
-        if self.scroll_bar_at_bottom():
-            self.enable_auto_scroll = True
-        else:
-            self.enable_auto_scroll = False
+    def slot_previous_command(self):
+        self.cmd_ptr -= 1
+        if self.cmd_ptr < 0:
+            self.cmd_ptr = len(self.cmd_history) - 1
+        self.command_line_edit.setText(self.cmd_history[self.cmd_ptr])
 
-    def auto_scroll(self):
-        if self.enable_auto_scroll and not self.scroll_bar_at_bottom():
-            self.log_text_edit.moveCursor(QTextCursor.End)
-            self.log_text_edit.ensureCursorVisible()
+    def slot_next_command(self):
+        self.cmd_ptr += 1
+        if self.cmd_ptr == len(self.cmd_history):
+            self.cmd_ptr = 0
+        self.command_line_edit.setText(self.cmd_history[self.cmd_ptr])
 
     def load_logs(self):
         pass
 
-    def slot_execute(self):
+    def run_command(self, command):
         pass
 
 
 class NQWindowPythonConsole(NQWindowConsole):
+    def __init__(self, allow_execute=False, custom_commands=None, *args, **kwargs):
+        self.log_records_count = 0
+        self.exec_dict = {"Runtime": NQApplication.Runtime, "log": NQApplication.Runtime.Service.NKLogger.log}
+        if isinstance(custom_commands, dict):
+            self.exec_dict.update(custom_commands)
+        super(NQWindowPythonConsole, self).__init__(allow_execute, *args, **kwargs)
+
     def load_logs(self):
         log_str = ""
-        logs = NQApplication.Runtime.Service.NKLogger.logs
-        if len(logs) > self.log_records_count:
+        logs = NQApplication.Runtime.Service.NKLogger.logs[NKLogger.CHANNEL_SYS]
+        if len(logs) != self.log_records_count:
             self.log_records_count = len(logs)
             self.slot_clear_log()
             for log in logs:
@@ -122,12 +129,16 @@ class NQWindowPythonConsole(NQWindowConsole):
                     log_str += NQFunctions.color_line(line=log_raw_str,
                                                       color_hex=NKConst.COLOR_STD_ERR,
                                                       change_line=False)
+                elif log.log_type == NKLogger.STD_WARNING:
+                    log_str += NQFunctions.color_line(line=log_raw_str,
+                                                      color_hex=NKConst.COLOR_STD_WARNING,
+                                                      change_line=False)
                 else:
                     log_str += NQFunctions.color_line(line=log_raw_str,
                                                       color_hex=NKConst.COLOR_GREY,
                                                       change_line=False)
             self.log_text_edit.setHtml(log_str)
 
-    def slot_execute(self):
-        exec(self.command_line_edit.text(), self.exec_dict)
+    def run_command(self, command):
+        exec(command, self.exec_dict)
         self.slot_clear_command_line()

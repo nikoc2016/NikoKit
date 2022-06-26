@@ -2,8 +2,7 @@ import random
 import datetime
 import string
 
-from PySide2.QtGui import QPixmap, QMovie
-
+from NikoKit.NikoQt.NQAdapter import QPixmap, QMovie
 from NikoKit.NikoStd import NKTime
 from NikoKit.NikoStd.NKDataStructure import NKDataStructure
 from NikoKit.NikoStd.NKPrintableMixin import NKPrintableMixin

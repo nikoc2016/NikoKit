@@ -1,5 +1,4 @@
-from PySide2.QtCore import Signal
-
+from NikoKit.NikoQt.NQAdapter import *
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidgetTree import NQWidgetTree
 from NikoKit.NikoStd.NKDataStructure import NKDataStructure
 

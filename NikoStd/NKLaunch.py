@@ -1,11 +1,33 @@
 import os
 import subprocess
-import win32con
+import tempfile
+import os.path as p
+from uuid import uuid4
 
-DISPLAY_MODE_HIDE = win32con.SW_HIDE
-DISPLAY_MODE_NORMAL = win32con.SW_SHOWNORMAL
-DISPLAY_MODE_MINIMIZED = win32con.SW_MINIMIZE
-DISPLAY_MODE_MAXIMIZE = win32con.SW_MAXIMIZE
+from NikoKit.NikoLib import NKFileSystem
+from NikoKit.NikoStd import NKConst
+
+# Copy from win32con
+SW_HIDE = 0
+SW_SHOWNORMAL = 1
+SW_NORMAL = 1
+SW_SHOWMINIMIZED = 2
+SW_SHOWMAXIMIZED = 3
+SW_MAXIMIZE = 3
+SW_SHOWNOACTIVATE = 4
+SW_SHOW = 5
+SW_MINIMIZE = 6
+SW_SHOWMINNOACTIVE = 7
+SW_SHOWNA = 8
+SW_RESTORE = 9
+SW_SHOWDEFAULT = 10
+SW_FORCEMINIMIZE = 11
+SW_MAX = 11
+
+DISPLAY_MODE_HIDE = SW_HIDE
+DISPLAY_MODE_NORMAL = SW_SHOWNORMAL
+DISPLAY_MODE_MINIMIZED = SW_MINIMIZE
+DISPLAY_MODE_MAXIMIZE = SW_MAXIMIZE
 
 
 def run(command,
@@ -28,7 +50,7 @@ def run(command,
             subprocess.Popen()
     """
     si = subprocess.STARTUPINFO()
-    si.dwFlags = win32con.STARTF_USESHOWWINDOW
+    si.dwFlags = subprocess.STARTF_USESHOWWINDOW
     si.wShowWindow = display_mode
 
     if not custom_env:
@@ -40,6 +62,40 @@ def run(command,
                             env={**os.environ, **custom_env},
                             cwd=cwd
                             )
+
+
+def run_system(command):
+    """
+    You can *NOT* manipulate subprocess with this method
+    The child process is launched as SYSTEM process
+    Use only when normal run() won't work
+
+    Args:
+        command: Command String that executes in cmd.exe
+
+    Returns:
+            subprocess.Popen()
+    """
+
+    target_dir = p.join(tempfile.gettempdir(), "NKLaunchProxy")
+    NKFileSystem.delete_try(target_dir)
+    NKFileSystem.scout(target_dir)
+    bat_path = p.join(target_dir, str(uuid4()) + ".bat")
+
+    # Convert List To String
+    if isinstance(command, list):
+        segments = []
+        for segment in command:
+            if " " in segment:
+                segments.append(f'"{segment}"')
+            else:
+                segments.append(segment)
+        command = " ".join(segments)
+
+    # Write to Bat
+    with open(bat_path, "w") as f:
+        f.write(f"@echo off\n" + command)
+        run(command=["explorer.exe", bat_path])
 
 
 def run_pipe(command,
@@ -80,7 +136,7 @@ def example_pipe_handling(process):
 
     """
     while process.poll() is None:
-        new_line = process.stdout.readline().decode()
+        new_line = process.stdout.readline().decode(NKConst.SYS_CHARSET)
         if new_line == "Done":
             continue
         else:
@@ -88,31 +144,32 @@ def example_pipe_handling(process):
             print("Progress: " + str(number))
             print("Result: " + str(number + number))
 
-
 # import os, sys
 # from time import sleep
 #
-# import LaunchExternal
+# import NKLaunch
 #
-# LaunchExternal.run(command=[r"D:\gvfpipe\experimental\Niko\LaunchExternal\TargetCode\exe_console.exe", "-superb"],
-#                    cwd=r"D:\gvfpipe\experimental\Niko\LaunchExternal\TargetCode",
-#                    display_mode=LaunchExternal.DISPLAY_MODE_NORMAL,
-#                    custom_env={"LaunchExternal": "Superb", "LaunchExternal2": "Superb2"},
+# NKLaunch.run(command=[r"D:\NKLaunch\TargetCode\exe_console.exe", "-superb"],
+#                    cwd=r"D:\NKLaunch\TargetCode",
+#                    display_mode=NKLaunch.DISPLAY_MODE_NORMAL,
+#                    custom_env={"NKLaunch": "Superb", "NKLaunch2": "Superb2"},
 #                    )
 #
-# LaunchExternal.run(command=[r"D:\gvfpipe\experimental\Niko\LaunchExternal\TargetCode\exe_gui.exe", "-superb"],
-#                    cwd=r"D:\gvfpipe\experimental\Niko\LaunchExternal\TargetCode",
-#                    display_mode=LaunchExternal.DISPLAY_MODE_HIDE,
-#                    custom_env={"LaunchExternal": "Superb", "LaunchExternal2": "Superb2"},
+# NKLaunch.run(command=[r"D:\NKLaunch\TargetCode\exe_gui.exe", "-superb"],
+#                    cwd=r"D:\NKLaunch\TargetCode",
+#                    display_mode=NKLaunch.DISPLAY_MODE_HIDE,
+#                    custom_env={"NKLaunch": "Superb", "NKLaunch2": "Superb2"},
 #                    )
 #
-# process = LaunchExternal.run_pipe(
-#     command=[r"D:\gvfpipe\experimental\Niko\LaunchExternal\TargetCode\exe_counter.exe", "10"],
-#     cwd=r"D:\gvfpipe\experimental\Niko\LaunchExternal\TargetCode",
-#     custom_env={"LaunchExternal": "Superb", "LaunchExternal2": "Superb2"},
+# NKLaunch.run_system([r"D:\NKZipTest\args.exe", "hello", "destination is here"])
+#
+# process = NKLaunch.run_pipe(
+#     command=[r"D:\NKLaunch\TargetCode\exe_counter.exe", "10"],
+#     cwd=r"D:\NKLaunch\TargetCode",
+#     custom_env={"NKLaunch": "Superb", "NKLaunch2": "Superb2"},
 #     )
 #
-# LaunchExternal.example_pipe_handling(process)
+# NKLaunch.example_pipe_handling(process)
 # i = 0
 # while True:
 #     i += 1

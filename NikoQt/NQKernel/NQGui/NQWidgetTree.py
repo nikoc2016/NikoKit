@@ -1,5 +1,4 @@
-from PySide2.QtWidgets import QTreeWidget
-
+from NikoKit.NikoQt.NQAdapter import QTreeWidget
 from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQMixin
 
 

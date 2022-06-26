@@ -1,92 +1,34 @@
 import os
 import os.path as p
+import tempfile
 import time
 import uuid
 from time import sleep
 
-from NikoKit.NikoStd import NKLaunch
+from NikoKit.NikoLib import NKFileSystem
+from NikoKit.NikoStd import NKLaunch, NKConst
 from NikoKit.NikoStd.NKDataStructure import NKDataStructure
+from NikoKit.NikoLib.bin import bin_7z
 
-PATH_7ZA_EXE = p.normpath(p.join(p.dirname(__file__), "bin", "7z.exe"))
+PATH_7ZA_EXE = "7z"
+PATH_7ZA_DLL = "7z"
 
 
-class SevenZipProcess(NKDataStructure):
-    """
-    Features:
-        Manage compress process and provide functions to check status
-
-    Members:
-        compress_id               A uuid represent a compress transaction
-        popen_proc_obj            A popen process object
-        std_out                   A custom stdout cache list, Default=None
-        std_err                   A custom stderr cache list, Default=None
-
-    APIs:
-        is_finished()             Boolean
-        is_finished_properly()    Boolean
-        return_code()             int or None(When still running)
-        info()                    {"std_out": [Lines], "std_err": [Lines]}
-    """
-
-    def __init__(self, transaction_id="", popen_proc_obj=None, std_out=None, std_err=None, *args, **kwargs):
-        super(SevenZipProcess, self).__init__(*args, **kwargs)
-        self.transaction_id = transaction_id
-        self.popen_proc_obj = popen_proc_obj
-        if std_out:
-            self.std_out = std_out
-        else:
-            self.std_out = []
-        if std_err:
-            self.std_err = std_err
-        else:
-            self.std_err = []
-
-    def is_finished(self):
-        return self.popen_proc_obj.poll() is not None
-
-    def is_finished_properly(self):
-        return self.popen_proc_obj.poll() == 0
-
-    def return_code(self):
-        return self.popen_proc_obj.poll()
-
-    # SYNC LAG WARNING
-    # Recommend: Use this only when is_finished() triggered
-    # Advance: Use this in a thread
-    def info(self):
-        self.cache_std_out()
-        self.cache_std_err()
-        return {
-            "std_out": self.std_out[:],
-            "std_err": self.std_err[:],
-            "return_code": self.return_code()
-        }
-
-    def cache_std_out(self):
-        lines = self.popen_proc_obj.stdout.readlines()
-        for line in lines:
-            try:
-                line = line.decode()
-            except:
-                line = line.decode("gbk")
-
-            if line != os.linesep:
-                line = line.replace(os.linesep, "")
-                self.std_out.append(line)
-
-    def cache_std_err(self):
-        lines = self.popen_proc_obj.stderr.readlines()
-        for line in lines:
-            try:
-                line = line.decode()
-            except:
-                line = line.decode("gbk")
-            if line != os.linesep:
-                line = line.replace(os.linesep, "")
-                self.std_err.append(line)
-
-    def p_key(self):
-        return self.transaction_id
+def prepare_7z_binaries(extract_dir=None):
+    global PATH_7ZA_EXE
+    global PATH_7ZA_DLL
+    if not extract_dir:
+        extract_dir = tempfile.gettempdir()
+    PATH_7ZA_EXE = p.normpath(p.join(extract_dir, "7z.exe"))
+    PATH_7ZA_DLL = p.normpath(p.join(extract_dir, "7z.dll"))
+    try:
+        NKFileSystem.write_file_from_base64(file_path=PATH_7ZA_EXE, base_64=bin_7z.res["7z.exe"])
+    except Exception as e:
+        print("7z.exe write failure, is it in use? [%s]" % e)
+    try:
+        NKFileSystem.write_file_from_base64(file_path=PATH_7ZA_DLL, base_64=bin_7z.res["7z.dll"])
+    except Exception as e:
+        print("7z.dll write failure, is it in use? [%s]" % e)
 
 
 def compress(compress_target, zip_path, zip_type="7z", password="", hide_names=True):
@@ -214,6 +156,88 @@ def free_7z_command(parameter_list):
     popen_process = NKLaunch.run_pipe(command=command)
     return SevenZipProcess(transaction_id=str(uuid.uuid4()), popen_proc_obj=popen_process)
 
+
+class SevenZipProcess(NKDataStructure):
+    """
+    Features:
+        Manage compress process and provide functions to check status
+
+    Members:
+        compress_id               A uuid represent a compress transaction
+        popen_proc_obj            A popen process object
+        std_out                   A custom stdout cache list, Default=None
+        std_err                   A custom stderr cache list, Default=None
+
+    APIs:
+        is_finished()             Boolean
+        is_finished_properly()    Boolean
+        return_code()             int or None(When still running)
+        info()                    {"std_out": [Lines], "std_err": [Lines]}
+    """
+
+    def __init__(self, transaction_id="", popen_proc_obj=None, std_out=None, std_err=None, *args, **kwargs):
+        super(SevenZipProcess, self).__init__(*args, **kwargs)
+        self.transaction_id = transaction_id
+        self.popen_proc_obj = popen_proc_obj
+        if std_out:
+            self.std_out = std_out
+        else:
+            self.std_out = []
+        if std_err:
+            self.std_err = std_err
+        else:
+            self.std_err = []
+
+    def is_finished(self):
+        return self.popen_proc_obj.poll() is not None
+
+    def is_finished_properly(self):
+        return self.popen_proc_obj.poll() == 0
+
+    def return_code(self):
+        return self.popen_proc_obj.poll()
+
+    # SYNC LAG WARNING
+    # Recommend: Use this only when is_finished() triggered
+    # Advance: Use this in a thread
+    def info(self):
+        self.cache_std_out()
+        self.cache_std_err()
+        return {
+            "std_out": self.std_out[:],
+            "std_err": self.std_err[:],
+            "return_code": self.return_code()
+        }
+
+    def cache_std_out(self):
+        lines = self.popen_proc_obj.stdout.readlines()
+        for line in lines:
+            try:
+                line = line.decode()
+            except:
+                line = line.decode(NKConst.SYS_CHARSET)
+
+            if line != os.linesep:
+                line = line.replace(os.linesep, "")
+                self.std_out.append(line)
+
+    def cache_std_err(self):
+        lines = self.popen_proc_obj.stderr.readlines()
+        for line in lines:
+            try:
+                line = line.decode()
+            except:
+                line = line.decode(NKConst.SYS_CHARSET)
+            if line != os.linesep:
+                line = line.replace(os.linesep, "")
+                self.std_err.append(line)
+
+    def p_key(self):
+        return self.transaction_id
+
+
+# EXTRACTING EXE TO TEMP, NO NEED IF `7Z` IS OS COMMAND ALREADY
+# prepare_7z_binaries()
 
 # cp = compress(compress_target=r"D:\NKZipTest\toPack", zip_path=r"D:\NKZipTest\a.7z", password="123")
 # while not cp.is_finished():

@@ -1,25 +1,19 @@
 import sys
 import os.path as p
-from NikoKit.NikoQt.NQApplication.NQRuntimeInterfaces import DefaultRuntime
+
+from NikoKit.NikoLib.NKFileSystem import get_exe_info
+from NikoKit.NikoQt.NQApplication.NQRuntime import NQRuntime
 from NikoKit.NikoQt.NQAdapter import *
+from NikoKit.NikoQt.NQKernel.NQGui.NQWindowLogs import NQWindowLogs
 
-Runtime = DefaultRuntime
+Runtime = NQRuntime
 
 
-def load_basic():
-    if getattr(sys, 'frozen', False):
-        Runtime.App.compiled = True
-        Runtime.App.my_dir = p.dirname(sys.executable)
-        Runtime.App.my_file_name = p.splitext(p.basename(sys.executable))[0]
-        Runtime.App.my_file_ext = p.splitext(p.basename(sys.executable))[1]
-    else:
-        Runtime.App.compiled = False
-        Runtime.App.my_dir = p.dirname(p.abspath(__file__))
-        Runtime.App.my_filename = p.splitext(p.basename(__file__))[0]
-        Runtime.App.my_file_ext = p.splitext(p.basename(__file__))[1]
+def load_basic(entry_py_path):
+    Runtime.App.compiled, Runtime.App.my_dir, Runtime.App.my_file_name, Runtime.App.my_file_ext = get_exe_info(entry_py_path)
 
-    if not Runtime.Path.appdata_dir:
-        Runtime.Path.appdata_dir = p.join(p.expanduser('~'), 'Documents', 'NQAppdata')
+    if not Runtime.Dir.appdata_dir:
+        Runtime.Dir.appdata_dir = p.join(p.expanduser('~'), 'Documents', 'NQAppdata')
 
 
 def load_service_nk_logger(log_dir):
@@ -39,12 +33,12 @@ def load_service_nk_language():
 
 def load_service_timer():
     from NikoKit.NikoQt.NQKernel.NQComponent.NQTimer import NQTimer
-    Runtime.Service.NKTimer = NQTimer()
+    Runtime.Service.NQTimer = NQTimer()
 
 
 def load_service_appdata_manager():
     from NikoKit.NikoLib.NKAppDataManager import NKAppDataManager
-    Runtime.Service.AppDataMgr = NKAppDataManager(appdata_root=Runtime.Path.appdata_dir)
+    Runtime.Service.AppDataMgr = NKAppDataManager(appdata_root=Runtime.Dir.appdata_dir)
     Runtime.Service.AppDataMgr.load_all()
 
 
@@ -63,17 +57,27 @@ def load_service_data_loader():
     Runtime.Signals.tick_passed.connect(Runtime.Gui.WinDataLoader.slot_refresh)
 
 
+def load_service_nk_guard(auto_quit=False):
+    from NikoKit.NikoLib.NKGuard import NKGuard
+    Runtime.Service.NKGuard = NKGuard(auto_quit=auto_quit)
+
+
+def load_service_cmd_server():
+    from NikoKit.NikoLib.NKCmd import NKCmdServer
+    Runtime.Service.NKCmd = NKCmdServer()
+
+
 def apply_dark_theme():
     app = QApplication.instance()
     app.setStyle('Fusion')
     palette = QPalette()
-    palette.setColor(QPalette.Window, QColor(53, 53, 53))
+    palette.setColor(QPalette.Window, QColor(60, 63, 65))
     palette.setColor(QPalette.WindowText, Qt.white)
-    palette.setColor(QPalette.Base, QColor(15, 15, 15))
+    palette.setColor(QPalette.Base, QColor(42, 42, 42))
     palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
     palette.setColor(QPalette.ToolTipBase, Qt.white)
     palette.setColor(QPalette.ToolTipText, Qt.white)
-    palette.setColor(QPalette.Text, Qt.white)
+    palette.setColor(QPalette.Text, QColor(169, 183, 198))
     palette.setColor(QPalette.Button, QColor(53, 53, 53))
     palette.setColor(QPalette.ButtonText, Qt.white)
     palette.setColor(QPalette.BrightText, Qt.red)

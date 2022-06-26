@@ -1,8 +1,13 @@
+import sys
 import threading
 
 PRINT_LOCK = threading.Lock()
 
 
-def tprint(*args, **kwargs):
+def tprint(*args):
     with PRINT_LOCK:
-        print(*args, **kwargs)
+        print(*args)
+
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)

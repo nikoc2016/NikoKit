@@ -1,5 +1,5 @@
 from NikoKit.NikoQt.NQAdapter import *
-from NikoKit.NikoQt.NQKernel.NQGui.NQChat.NQWidgetChatEdit import NQWidgetChatEdit
+from NikoKit.NikoQt.NQKernel.NQGui.NQChatSuite.NQWidgetChatEdit import NQWidgetChatEdit
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
 
 

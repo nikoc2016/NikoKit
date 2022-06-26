@@ -16,6 +16,7 @@ class NQTimer(QObject):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.slot_timeout)
+        QApplication.instance().aboutToQuit.connect(self.stop_timer)
         self.timer.start(500)
 
     def slot_timeout(self):
@@ -48,3 +49,7 @@ class NQTimer(QObject):
         self.previous_minute = curr_minute
         self.previous_second = curr_second
         self.previous_has_initiated = True
+
+    def stop_timer(self):
+        self.timer.stop()
+

@@ -1,3 +1,6 @@
+import codecs
+import locale
+
 COLOR_RED = "#FF4500"
 COLOR_BLUE = "#80C8FF"
 COLOR_GREEN = "#80FF80"
@@ -6,6 +9,7 @@ COLOR_GREY = "#9E9E9E"
 COLOR_LIME = "#26CA19"
 COLOR_STD_OUT = "#CCCCCC"
 COLOR_STD_ERR = "#FA6967"
+COLOR_STD_WARNING = "#C19C00"
 COLOR_EASY_RED = "#C0504D"
 COLOR_EASY_BLUE = "#4F81BD"
 
@@ -20,3 +24,5 @@ DAY = "DAY"
 ALL = "ALL"
 GLOBAL = "GLOBAL"
 UNGROUPED = "UNGROUPED"
+
+SYS_CHARSET = codecs.lookup(locale.getpreferredencoding()).name

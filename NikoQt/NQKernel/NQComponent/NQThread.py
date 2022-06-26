@@ -1,5 +1,4 @@
-from PySide2.QtCore import QThread
-
+from NikoKit.NikoQt.NQAdapter import *
 from NikoKit.NikoStd.NKPrintableMixin import NKPrintableMixin
 
 

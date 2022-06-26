@@ -90,7 +90,10 @@ class NKLanguage:
                 "ctime": "修改时间",
                 "atime": "访问时间",
                 "size": "大小",
-                "path": "路径"
+                "path": "路径",
+                "submit": "提交",
+                "channel": "频道",
+                "quit": "退出"
             }
         }
         self.chosen_language = NKConst.ZH_CN
@@ -98,8 +101,11 @@ class NKLanguage:
     def patch(self, language, patch_pack):
         self.dictionaries[language].update(patch_pack)
 
-    def tran(self, lang_key):
-        try:
-            return self.dictionaries[self.chosen_language][lang_key]
-        except:
-            return lang_key + " "
+    def tran(self, *args):
+        result = ""
+        for arg in args:
+            try:
+                result += self.dictionaries[self.chosen_language][arg]
+            except:
+                result += arg + " "
+        return result

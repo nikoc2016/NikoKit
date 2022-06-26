@@ -1,8 +1,8 @@
 from NikoKit.NikoQt.NQAdapter import *
-from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
+from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQMixin
 
 
-class NQWidgetLabel(QLabel, NQWidget):
+class NQWidgetLabel(NQMixin, QLabel):
     clicked = Signal()
 
     def mousePressEvent(self, event):

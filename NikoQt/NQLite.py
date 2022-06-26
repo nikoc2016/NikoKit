@@ -8,6 +8,8 @@ class NQLite:
                  name_short,
                  version,
                  version_tag,
+                 entry_py_path,
+                 config=None,
                  icon_res_name="",
                  runtime=None,
                  appdata_dir="",
@@ -21,7 +23,7 @@ class NQLite:
                  enable_window_manager=True,
                  enable_appdata_manager=True,
                  enable_data_loader=True,
-                 enable_nk_language=True,
+                 enable_nk_language=True
                  ):
         # Storage
         self.QApplication = None
@@ -54,14 +56,15 @@ class NQLite:
         NQApplication.Runtime.App.name_short = name_short
         NQApplication.Runtime.App.version = version
         NQApplication.Runtime.App.version_tag = version_tag
+        NQApplication.Runtime.Config = config
         NQApplication.Runtime.App.use_dummy = use_dummy
-        NQApplication.Runtime.Path.appdata_dir = appdata_dir
-        NQApplication.Runtime.Path.log_dir = log_dir
+        NQApplication.Runtime.Dir.appdata_dir = appdata_dir
+        NQApplication.Runtime.Dir.log_dir = log_dir
 
         if icon_res_name:
             NQApplication.Runtime.App.icon_res_name = icon_res_name
 
-        NQApplication.load_basic()
+        NQApplication.load_basic(entry_py_path)
         if enable_nk_logger:
             NQApplication.load_service_nk_logger(log_dir)
         if enable_resource:
@@ -81,3 +84,11 @@ class NQLite:
 
     def serve(self):
         self.QApplication.exec_()
+
+    def exit(self):
+        from NikoKit.NikoQt import NQApplication
+        try:
+            NQApplication.Runtime.Service.NQTimer.stop_timer()
+        except:
+            pass
+        self.QApplication.quit()

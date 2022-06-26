@@ -1,6 +1,5 @@
-from PySide2.QtCore import Signal
-
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
+from NikoKit.NikoQt.NQAdapter import *
 
 
 class NQWidgetExplorerNavBar(NQWidget):
