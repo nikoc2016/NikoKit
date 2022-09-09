@@ -1,21 +1,23 @@
 import html
+import select
+import socket
 
 from NikoKit.NikoQt import NQApplication
 from NikoKit.NikoQt.NQAdapter import *
-from NikoKit.NikoLib import NKLogger
+from NikoKit.NikoLib import NKLogger, NKCmd
 from NikoKit.NikoQt.NQKernel import NQFunctions
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidgetConsoleLineEdit import NQWidgetConsoleLineEdit
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidgetConsoleTextEdit import NQWidgetConsoleTextEdit
 from NikoKit.NikoQt.NQKernel.NQGui.NQWindow import NQWindow
 from NikoKit.NikoStd import NKConst
+from NikoKit.NikoStd.NKDataStructure import NKDataStructure
+from NikoKit.NikoStd.NKTime import NKDatetime
 
 
 class NQWindowConsole(NQWindow):
     def __init__(self, allow_execute=False, *args, **kwargs):
         # Variable
         self.allow_execute = allow_execute
-        self.cmd_history = [""]
-        self.cmd_ptr = 0
 
         # GUI Components
         self.main_lay = None
@@ -60,8 +62,6 @@ class NQWindowConsole(NQWindow):
         super(NQWindowConsole, self).connect_signals()
         self.execute_button.clicked.connect(self.slot_execute)
         self.command_line_edit.returnPressed.connect(self.slot_execute)
-        self.command_line_edit.upPressed.connect(self.slot_previous_command)
-        self.command_line_edit.downPressed.connect(self.slot_next_command)
         NQApplication.Runtime.Signals.tick_passed.connect(self.load_logs)
 
     def slot_clear(self):
@@ -71,31 +71,16 @@ class NQWindowConsole(NQWindow):
     def slot_clear_command_line(self):
         self.command_line_edit.setText("")
 
+    def slot_save_and_clear_command_line(self):
+        self.command_line_edit.slot_save_history()
+
     def slot_clear_log(self):
         self.log_text_edit.setHtml("")
 
-    def slot_clear_history(self):
-        self.cmd_history = [""]
-        self.cmd_ptr = 0
-
     def slot_execute(self):
         cmd = self.command_line_edit.text()
-        self.cmd_history[-1] = cmd
-        self.cmd_history.append("")
-        self.cmd_ptr = len(self.cmd_history) - 1
         self.run_command(cmd)
-
-    def slot_previous_command(self):
-        self.cmd_ptr -= 1
-        if self.cmd_ptr < 0:
-            self.cmd_ptr = len(self.cmd_history) - 1
-        self.command_line_edit.setText(self.cmd_history[self.cmd_ptr])
-
-    def slot_next_command(self):
-        self.cmd_ptr += 1
-        if self.cmd_ptr == len(self.cmd_history):
-            self.cmd_ptr = 0
-        self.command_line_edit.setText(self.cmd_history[self.cmd_ptr])
+        self.slot_save_and_clear_command_line()
 
     def load_logs(self):
         pass
@@ -119,7 +104,7 @@ class NQWindowPythonConsole(NQWindowConsole):
             self.log_records_count = len(logs)
             self.slot_clear_log()
             for log in logs:
-                log_raw_str = html.escape(str(log.log_context)).replace("\n", "<br/>").replace(" ", "&nbsp;")
+                log_raw_str = NQFunctions.text_to_html(log.log_context)
 
                 if log.log_type == NKLogger.STD_OUT:
                     log_str += NQFunctions.color_line(line=log_raw_str,
@@ -141,4 +126,81 @@ class NQWindowPythonConsole(NQWindowConsole):
 
     def run_command(self, command):
         exec(command, self.exec_dict)
-        self.slot_clear_command_line()
+
+
+class NQWindowNKCmdConsole(NQWindowConsole):
+    def __init__(self, host, port, allow_execute=False, *args, **kwargs):
+        self.logs = []
+        self.logs_count_cache = 0
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.settimeout(1)
+        self.host = host
+        self.port = port
+
+        super(NQWindowNKCmdConsole, self).__init__(allow_execute, *args, **kwargs)
+
+    class CmdLog(NKDataStructure):
+        CREATOR_ME = "CREATOR_ME"
+        CREATOR_TARGET = "CREATOR_TARGET"
+
+        def __init__(self, log_creator, log_context, log_datetime=None):
+            self.log_creator = log_creator
+            self.log_context = log_context
+            if log_datetime:
+                self.log_datetime = log_datetime
+            else:
+                self.log_datetime = NKDatetime.now()
+            super(NQWindowNKCmdConsole.CmdLog, self).__init__()
+
+    def load_logs(self):
+        read_ready, ready_write, exceptional = select.select([self.sock], [], [], 0)
+        if len(read_ready):
+            try:
+                received = str(self.sock.recv(1024), NKConst.SYS_CHARSET)
+            except WindowsError as e:
+                if e.winerror == 10054:
+                    received = "FAIL Server Offline"
+                else:
+                    received = "FAIL " + str(e)
+            self.logs.append(self.CmdLog(log_creator=self.CmdLog.CREATOR_TARGET,
+                                         log_context=received))
+
+        log_str = ""
+
+        if len(self.logs) != self.logs_count_cache:
+            self.logs_count_cache = len(self.logs)
+            self.slot_clear_log()
+            for log in self.logs:
+                log_raw_str = NQFunctions.text_to_html(log.log_context)
+
+                if log.log_creator == self.CmdLog.CREATOR_ME:
+                    log_str += NQFunctions.color_line(line=log_raw_str,
+                                                      color_hex=NKConst.COLOR_GOLD,
+                                                      change_line=True)
+
+                elif log.log_creator == self.CmdLog.CREATOR_TARGET and \
+                        log.log_context.startswith(NKCmd.NKCmdServer.RESULT_SIGN_GOOD):
+                    log_str += NQFunctions.color_line(line=log_raw_str,
+                                                      color_hex=NKConst.COLOR_GREEN,
+                                                      change_line=True)
+
+                elif log.log_creator == self.CmdLog.CREATOR_TARGET and \
+                        log.log_context.startswith(NKCmd.NKCmdServer.RESULT_SIGN_FAIL):
+                    log_str += NQFunctions.color_line(line=log_raw_str,
+                                                      color_hex=NKConst.COLOR_RED,
+                                                      change_line=True)
+                else:
+                    log_str += NQFunctions.color_line(line=log_raw_str,
+                                                      color_hex=NKConst.COLOR_GREY,
+                                                      change_line=True)
+
+            self.log_text_edit.setHtml(log_str)
+
+    def run_command(self, command):
+        try:
+            self.logs.append(self.CmdLog(log_creator=self.CmdLog.CREATOR_ME,
+                                         log_context=command))
+            self.sock.sendto(bytes(command, NKConst.SYS_CHARSET), (self.host, self.port))
+        except Exception as e:
+            self.logs.append(self.CmdLog(log_creator=self.CmdLog.CREATOR_TARGET,
+                                         log_context=NKCmd.NKCmdServer.RESULT_SIGN_FAIL + repr(e)))

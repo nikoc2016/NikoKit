@@ -71,6 +71,7 @@ class NKLanguage:
                 "next_time": u"下次",
                 "countdown": u"倒数",
                 "selection": u"选择",
+                "switch": u"切换",
                 "chosen": u"选中",
                 "holiday": u"节假日",
                 "project": u"项目",
@@ -92,8 +93,19 @@ class NKLanguage:
                 "size": "大小",
                 "path": "路径",
                 "submit": "提交",
+                "restart": "重启",
                 "channel": "频道",
-                "quit": "退出"
+                "quit": "退出",
+                "select": "选择",
+                "confirm": "确定",
+                "refresh": "刷新",
+                "tool": "工具",
+                "search": "搜索",
+                "seat": "座位",
+                "number": "数字",
+                "succeed": "成功",
+                "fail": "失败",
+                "result": "结果"
             }
         }
         self.chosen_language = NKConst.ZH_CN

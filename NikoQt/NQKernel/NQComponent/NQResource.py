@@ -7,23 +7,38 @@ class NQResource(NKResource):
         return QByteArray.fromBase64(self.res[res_name])
 
     def QBuffer(self, res_name):
-        return QBuffer().setData(self.QByteArray(res_name))
+        buffer = QBuffer()
+        buffer.nq_cache_byte_array = self.QByteArray(res_name)
+        buffer.setData(buffer.nq_cache_byte_array)
+        return buffer
 
     def QPixmap(self, res_name):
         new_pixmap = QPixmap()
-        new_pixmap.loadFromData(self.QByteArray(res_name))
+        new_pixmap.nq_cache_byte_array = self.QByteArray(res_name)
+        new_pixmap.loadFromData(new_pixmap.nq_cache_byte_array)
         return new_pixmap
 
     def QImage(self, res_name):
         new_image = QImage()
-        new_image.loadFromData(self.QByteArray(res_name))
+        new_image.nq_cache_byte_array = self.QByteArray(res_name)
+        new_image.loadFromData(new_image.nq_cache_byte_array)
         return new_image
 
     def QIcon(self, res_name):
-        return QIcon(self.QPixmap(res_name))
+        new_icon = QIcon()
+        new_icon.nq_cache_pixmap = self.QPixmap(res_name)
+        new_icon.addPixmap(new_icon.nq_cache_pixmap)
+        return new_icon
 
     def QMovie(self, res_name):
-        return QMovie(self.QBuffer(res_name))
+        movie = QMovie()
+        movie.nq_cache_buffer = self.QBuffer(res_name)
+        movie.setDevice(movie.nq_cache_buffer)
+        movie.setCacheMode(QMovie.CacheAll)
+        movie.setSpeed(100)
+        movie.jumpToFrame(movie.frameCount() - 1)
+        movie.start()
+        return movie
 
     @staticmethod
     def get_size_of_media(media):

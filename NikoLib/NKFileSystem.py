@@ -1,12 +1,45 @@
 import base64
+import errno
 import hashlib
 import io
 import os
 import os.path as p
 import shutil
 import sys
+import tempfile
 
 from NikoKit.NikoStd.NKDataStructure import NKDataStructure
+
+
+class NKHDLock:
+    lock_handles = {}
+    lock_dir = p.join(tempfile.gettempdir(), "NKHDLock")
+    lock_ext = ".lock"
+
+    @classmethod
+    def lock(cls, lock_name):
+        if not cls.is_locked(lock_name):
+            scout(cls.lock_dir)
+            lock_handle = open(p.join(cls.lock_dir, lock_name + cls.lock_ext), "w")
+            cls.lock_handles[lock_name] = lock_handle
+            return True
+        return False
+
+    @classmethod
+    def unlock(cls, lock_name):
+        if lock_name in cls.lock_handles:
+            cls.lock_handles[lock_name].close()
+            return True
+        return False
+
+    @classmethod
+    def is_locked(cls, lock_name):
+        try:
+            os.remove(p.join(cls.lock_dir, lock_name + cls.lock_ext))
+            return False
+        except OSError as e:
+            if e.errno != errno.ENOENT:
+                return True
 
 
 # Call with __file__ and it will work
@@ -83,9 +116,35 @@ def delete_try(url):
         pass
 
     try:
-        shutil.rmtree(url)
+        boom_dir(url)
     except:
         pass
+
+
+def boom_dir(target_dir, remove_root=True):
+    if not p.isdir(target_dir):
+        return True
+    is_empty_folder = True
+    if target_dir[-1] == os.sep:
+        target_dir = target_dir[:-1]
+
+    files = os.listdir(target_dir)
+    for file in files:
+        if file == '.' or file == '..':
+            continue
+        path = os.path.join(target_dir, file)
+        if os.path.isdir(path):
+            is_empty_recursive_child = boom_dir(path)
+            if not is_empty_recursive_child:
+                is_empty_folder = False
+        else:
+            try:
+                os.remove(path)
+            except Exception as e:
+                is_empty_folder = False
+    if is_empty_folder and remove_root:
+        os.rmdir(target_dir)
+    return is_empty_folder
 
 
 class NKFile(NKDataStructure):

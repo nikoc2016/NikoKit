@@ -4,19 +4,20 @@ import os.path as p
 from NikoKit.NikoLib.NKFileSystem import get_exe_info
 from NikoKit.NikoQt.NQApplication.NQRuntime import NQRuntime
 from NikoKit.NikoQt.NQAdapter import *
-from NikoKit.NikoQt.NQKernel.NQGui.NQWindowLogs import NQWindowLogs
+# from NikoKit.NikoQt.NQKernel.NQGui.NQWindowLogs import NQWindowLogs
 
 Runtime = NQRuntime
 
 
 def load_basic(entry_py_path):
-    Runtime.App.compiled, Runtime.App.my_dir, Runtime.App.my_file_name, Runtime.App.my_file_ext = get_exe_info(entry_py_path)
+    Runtime.App.compiled, Runtime.App.my_dir, Runtime.App.my_file_name, Runtime.App.my_file_ext = get_exe_info(
+        entry_py_path)
 
     if not Runtime.Dir.appdata_dir:
         Runtime.Dir.appdata_dir = p.join(p.expanduser('~'), 'Documents', 'NQAppdata')
 
 
-def load_service_nk_logger(log_dir):
+def load_service_nk_logger(log_dir=Runtime.Dir.log_dir):
     from NikoKit.NikoLib.NKLogger import NKLogger
     Runtime.Service.NKLogger = NKLogger(log_dir=log_dir)
 
@@ -45,6 +46,13 @@ def load_service_appdata_manager():
 def load_service_window_manager():
     from NikoKit.NikoQt.NQKernel.NQGui.NQWindow import NQWindowManager
     Runtime.Gui.WinMgr = NQWindowManager
+
+
+def load_service_tray_manager():
+    from NikoKit.NikoQt.NQKernel.NQGui.NQTrayIcon import NQTrayIconManager
+    Runtime.Gui.TrayIconMgr = NQTrayIconManager
+    Runtime.Gui.TrayIconMgr.rebuild()
+    Runtime.Gui.TrayIconMgr.show_tray_icon()
 
 
 def load_service_data_loader():

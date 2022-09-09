@@ -64,7 +64,7 @@ def run(command,
                             )
 
 
-def run_system(command):
+def run_system(command, pause=False):
     """
     You can *NOT* manipulate subprocess with this method
     The child process is launched as SYSTEM process
@@ -72,6 +72,7 @@ def run_system(command):
 
     Args:
         command: Command String that executes in cmd.exe
+        pause: Pausing the script in the end
 
     Returns:
             subprocess.Popen()
@@ -91,10 +92,58 @@ def run_system(command):
             else:
                 segments.append(segment)
         command = " ".join(segments)
+    else:
+        command = str(command)
+
+    if pause:
+        command += "\npause"
 
     # Write to Bat
     with open(bat_path, "w") as f:
         f.write(f"@echo off\n" + command)
+        run(command=["explorer.exe", bat_path])
+
+
+def run_system_sequential(commands, pause=False):
+    """
+    You can *NOT* manipulate subprocess with this method
+    The child process is launched as SYSTEM process
+    Use only when normal run() won't work
+
+    Args:
+        commands: Multiple or single lines that will execute in cmd.exe
+        pause: Pausing the script in the end
+
+    Returns:
+            subprocess.Popen()
+    """
+    target_dir = p.join(tempfile.gettempdir(), "NKLaunchProxy")
+    NKFileSystem.delete_try(target_dir)
+    NKFileSystem.scout(target_dir)
+    bat_path = p.join(target_dir, str(uuid4()) + ".bat")
+
+    bat_content = "@echo off\n"
+
+    # Convert List To String
+    for command in commands:
+        if isinstance(command, list):
+            segments = []
+            for segment in command:
+                if " " in segment:
+                    segments.append('"' + str(segment) + '"')
+                else:
+                    segments.append(segment)
+            command = " ".join(segments)
+            bat_content += command + "\n"
+        else:
+            bat_content += str(command) + "\n"
+
+    if pause:
+        bat_content += "\npause"
+
+    # Write to Bat
+    with open(bat_path, "w") as f:
+        f.write(bat_content)
         run(command=["explorer.exe", bat_path])
 
 

@@ -123,7 +123,7 @@ class TimeMeasure:
             start_time = datetime.datetime.now()
             result = func(*args, **kwargs)
             end_time = datetime.datetime.now()
-            tprint("Execute time<%s>: %s" % (func.__name__, str(end_time - start_time)))
+            tprint("Execute time<%s.%s>: %s" % (str(func.__module__), str(func.__qualname__), str(end_time - start_time)))
             return result
 
         return inner

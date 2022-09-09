@@ -12,6 +12,7 @@ class DefaultSignals(QObject):
     hour_passed = Signal(int)  # Range 0-23
     day_passed = Signal(int)  # Range 1-31
     month_passed = Signal(int)  # Range 1-12
+    tray_clicked = Signal(object)  # reason
 
 
 class NQRuntime(QObject):
@@ -30,6 +31,8 @@ class NQRuntime(QObject):
         name_short = "NQ"
         version = NKVersion("1.0.0")
         version_tag = NKVersion.ALPHA
+        cmd_server_host = "localhost"
+        cmd_server_port = 0
         compiled = False
         my_dir = ""
         my_file_name = ""
@@ -57,6 +60,8 @@ class NQRuntime(QObject):
         WinMgr = None
         WinDataLoader = None
         WinLogs = None
+        TrayIcon = None
+        TrayIconMgr = None
 
     class Database:
         Conn = None

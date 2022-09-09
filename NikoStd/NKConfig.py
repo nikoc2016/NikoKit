@@ -1,4 +1,3 @@
-import ast
 import os.path as p
 import yaml
 
@@ -17,8 +16,7 @@ class NKConfig(NKDataStructure):
             with open(p.join(yaml_path), "r") as f:
                 config_dict = yaml.load(f, Loader=yaml.FullLoader)
                 try:
-                    yaml_config = self.__class__(**config_dict)
-                    self.update(yaml_config)
+                    self.update_by_dict(config_dict)
                 except Exception as e:
                     print("Cfg::yaml cfg patch error:", e)
         except Exception as e:
@@ -35,22 +33,28 @@ class NKConfig(NKDataStructure):
 
     def configure_parser(self, parser):
         for key, value in vars(self).items():
-            if isinstance(value, int):
-                parser.add_argument(f"--{key}", type=int, help=str(value))
-            elif isinstance(value, float):
-                parser.add_argument(f"--{key}", type=float, help=str(value))
-            elif isinstance(value, bool):
-                parser.add_argument(f"--{key}", help='True or False', type=ast.literal_eval)
-            elif isinstance(value, list):
-                parser.add_argument(f"--{key}", action='append', help=str(value), type=str)
+            if type(value) == bool:
+                parser.add_argument("--%s" % key, action='store_true', help="Default:%s" % value)
+                parser.add_argument("--no-%s" % key, dest=key, action='store_false', help="Default:%s" % value)
+                parser.set_defaults(**{key: value})
+            elif type(value) == int:
+                parser.add_argument("--%s" % key, type=int, help=str(value))
+            elif type(value) == float:
+                parser.add_argument("--%s" % key, type=float, help=str(value))
+            elif type(value) == list:
+                parser.add_argument("--%s" % key, action='append', help=str(value), type=str)
             else:
-                parser.add_argument(f"--{key}", type=str, help=str(value))
+                parser.add_argument("--%s" % key, type=str, help=str(value))
 
     def patch_from_parser(self, parser, custom_arg_list=None):
         if custom_arg_list:
             arg_dict = vars(parser.parse_args(custom_arg_list))
         else:
             arg_dict = vars(parser.parse_args())
-        for key, value in arg_dict.items():
+
+        self.update_by_dict(arg_dict)
+
+    def update_by_dict(self, data_dict):
+        for key, value in data_dict.items():
             if value:
                 self.__dict__[key] = value

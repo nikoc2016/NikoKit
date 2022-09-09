@@ -93,8 +93,8 @@ class NQWindowLogs(NQWindow):
                                                           change_line=False)
                 self.channel_to_console[selected_channel].setHtml(log_str)
         except Exception as e:
-            err_msg = traceback.format_exc().replace("\n", "<br/>").replace(" ", "&nbsp;")
+            err_msg = NQFunctions.text_to_html(traceback.format_exc())
             self.channel_to_console[selected_channel].setHtml(
-                NQFunctions.color_line(line=f"FAIL::CONNECT TO NKLOGGER CHANNEL <br/> {err_msg}",
+                NQFunctions.color_line(line="FAIL::CONNECT TO NKLOGGER CHANNEL <br/> %s " % err_msg,
                                        color_hex=NKConst.COLOR_RED,
                                        change_line=False))

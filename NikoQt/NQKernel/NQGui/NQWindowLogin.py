@@ -121,21 +121,29 @@ class NQWindowLogin(NKAppDataMixin, NQWindow):
     def connect_signals(self):
         super(NQWindowLogin, self).connect_signals()
         self.login_button.clicked.connect(self.slot_login_button_clicked)
+        self.username_line_edit.returnPressed.connect(self.slot_username_entered)
+        self.password_line_edit.returnPressed.connect(self.slot_password_entered)
+
+    def slot_username_entered(self):
+        self.password_line_edit.setFocus()
+
+    def slot_password_entered(self):
+        self.slot_login_button_clicked()
 
     def slot_login_button_clicked(self):
         username, password = self.get_username_password()
-        # try:
-        user_token = self.login_validator(username, password)
-        if user_token:
-            self.save_appdata()
-            self.signal_done.emit(self.w_id, user_token)
-            if self.success_callback:
-                self.success_callback()
-            self.close()
-        else:
-            self.message_label.setText(self.lang("username", "or", "password", "incorrect"))
-        # except Exception as e:
-        #     self.message_label.setText("validator failure:" + str(e))
+        try:
+            user_token = self.login_validator(username, password)
+            if user_token:
+                self.save_appdata()
+                self.signal_done.emit(self.w_id, user_token)
+                if self.success_callback:
+                    self.success_callback()
+                self.close()
+            else:
+                self.message_label.setText(self.lang("username", "or", "password", "incorrect"))
+        except Exception as e:
+            self.message_label.setText("validator failure:" + str(e))
 
     def get_username_password(self):
         return self.username_line_edit.text(), self.password_line_edit.text()

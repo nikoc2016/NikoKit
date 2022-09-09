@@ -3,7 +3,7 @@ from NikoKit.NikoQt.NQKernel.NQGui.NQWindow import NQWindow
 
 
 class NQWindowInfo(NQWindow):
-    def __init__(self, info_string, auto_change_line=True, *args, **kwargs):
+    def __init__(self, info_string, auto_change_line=True, on_top=True, *args, **kwargs):
         # Switches
         self.auto_change_line = auto_change_line
 
@@ -13,6 +13,8 @@ class NQWindowInfo(NQWindow):
         self.understood_button = None
 
         super(NQWindowInfo, self).__init__(*args, **kwargs)
+        if on_top:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint)
 
         self.slot_show()
         self.set_info(info_string)

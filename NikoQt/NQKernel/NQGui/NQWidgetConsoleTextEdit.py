@@ -4,6 +4,7 @@ from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQMixin
 
 class NQWidgetConsoleTextEdit(QTextEdit, NQMixin):
     def __init__(self, auto_scroll=True, *args, **kwargs):
+        self.scroll_bar_value = 0
         self.auto_scroll = auto_scroll
         self.ready_to_scroll = False
         self.html_cache = ""
@@ -29,6 +30,7 @@ class NQWidgetConsoleTextEdit(QTextEdit, NQMixin):
             self.smart_scroll()
 
     def smart_scroll_prepare(self):
+        self.scroll_bar_value = self.verticalScrollBar().value()
         if self.scroll_bar_at_bottom():
             self.ready_to_scroll = True
         else:
@@ -43,3 +45,5 @@ class NQWidgetConsoleTextEdit(QTextEdit, NQMixin):
         if self.auto_scroll and self.ready_to_scroll and not self.scroll_bar_at_bottom():
             self.moveCursor(QTextCursor.End)
             self.ensureCursorVisible()
+        else:
+            self.verticalScrollBar().setValue(self.scroll_bar_value)

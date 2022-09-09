@@ -33,7 +33,7 @@ class NKCmdServer(NKPrintableMixin):
         cls.udp_thread = cls.UdpThread()
         cls.udp_thread.start()
         if not silent_mode:
-            tprint("Cmd::Server OK.")
+            tprint("NKCmd::Server OK.")
 
     @classmethod
     def stop(cls, silent_mode=False):
@@ -44,7 +44,7 @@ class NKCmdServer(NKPrintableMixin):
             pass
         cls.udp_thread = None
         if not silent_mode:
-            tprint("Cmd::Server Shutdown.")
+            tprint("NKCmd::Server Shutdown.")
 
     @classmethod
     def register_command(cls, command_keyword, help_text):
@@ -89,7 +89,7 @@ class NKCmdServer(NKPrintableMixin):
             cls.finish_command(command_id=command_id,
                                result_sign=cls.RESULT_SIGN_GOOD,
                                result_detail=help_str)
-            
+
         else:
             cls.finish_command(command_id=command_id,
                                result_sign=cls.RESULT_SIGN_FAIL,
@@ -100,18 +100,20 @@ class NKCmdServer(NKPrintableMixin):
         command_task = cls.command_id_to_task[command_id]
         result_detail = str(result_detail)
         if command_task.result or command_task.send_datetime:
-            tprint("Cmd::finish_command::Command %i is already finished. New result does not apply: %s" % (command_id,
-                                                                                                          result_detail))
+            tprint("NKCmd::finish_command::Command %i is closed. New result does not apply: %s" % (command_id,
+                                                                                                   result_detail))
         else:
             command_task.result = result_detail
             command_task.send_datetime = NKDatetime.now()
             try:
-                command_task.client_socket.sendto(bytes(result_sign + result_detail, NKConst.SYS_CHARSET),
-                                                  command_task.client_address)
-                command_task.client_socket = None
+                if command_task.client_socket:
+                    command_task.client_socket.sendto(bytes(result_sign + result_detail, NKConst.SYS_CHARSET),
+                                                      command_task.client_address)
+                    command_task.client_socket = None
             except Exception as e:
                 tprint(
-                    "Cmd::finish_command::[Command %i: %s] Fail to send back: %s" % (command_id, result_detail, str(e)))
+                    "NKCmd::finish_command::[Command %i: %s] Fail to send back: %s" % (
+                        command_id, result_detail, str(e)))
 
     class CommandTask(NKDataStructure):
         def __init__(self,
@@ -140,7 +142,7 @@ class NKCmdServer(NKPrintableMixin):
         def handle(self):
             command_line = self.request[0].strip()
             try:
-                command_line = command_line.decode()
+                command_line = command_line.decode(NKConst.SYS_CHARSET)
             except:
                 pass
 

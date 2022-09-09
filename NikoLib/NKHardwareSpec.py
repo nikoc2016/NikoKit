@@ -3,6 +3,8 @@ import subprocess
 
 import wmi
 
+from NikoKit.NikoStd import NKConst
+
 
 class NKHardwareSpec:
     def __init__(self):
@@ -38,7 +40,16 @@ class NKHardwareSpec:
 
             # If mboard_id is " " or "To be filled by O.E.M."， OVERRIDE
             if " " in str(mboard_info["mboard_id"]):
-                mboard_info["mboard_id"] = subprocess.check_output('wmic csproduct get uuid').split('\n')[1].strip()
+                output = subprocess.check_output('wmic csproduct get uuid')
+                try:
+                    output = output.decode()
+                except:
+                    pass
+                try:
+                    output = output.decode(NKConst.SYS_CHARSET)
+                except:
+                    pass
+                mboard_info["mboard_id"] = output.split('\n')[1].strip()
 
             mainboard.append(mboard_info)
         return mainboard

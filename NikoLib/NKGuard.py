@@ -26,10 +26,11 @@ class NKGuard:
         if not silent_mode:
             tprint("Guard::Protection Started")
 
-    def stop(self, silent_mode=False):
+    def stop(self, silent_mode=False, join=True):
         try:
             self.guard_thread.stop()
-            self.guard_thread.join()
+            if join:
+                self.guard_thread.join()
         except:
             pass
         self.guard_thread = None

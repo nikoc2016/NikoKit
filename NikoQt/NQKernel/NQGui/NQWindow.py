@@ -19,7 +19,10 @@ class NQWindowManager:
         except:
             pass
 
-        del NQApplication.Runtime.Gui.Wins[w_id]
+        try:
+            del NQApplication.Runtime.Gui.Wins[w_id]
+        except:
+            print(f"NQWindow(w_id:{w_id}) not in WINDOW-MANAGER. Release your own pointer.")
 
     @classmethod
     def remove(cls, window):
@@ -44,8 +47,8 @@ class NQWindow(NQWidget):
     def __init__(self,
                  w_width=1024,
                  w_height=768,
-                 w_margin_x=0,
-                 w_margin_y=0,
+                 w_margin_x=None,
+                 w_margin_y=None,
                  *args,
                  **kwargs):
         # Parent Construction
@@ -60,9 +63,9 @@ class NQWindow(NQWidget):
     def init_geo(self,
                  w_width=1024,
                  w_height=768,
-                 w_margin_x=0,
-                 w_margin_y=0):
-        if w_margin_x or w_margin_y:
+                 w_margin_x=None,
+                 w_margin_y=None):
+        if isinstance(w_margin_x, int) or isinstance(w_margin_y, int):
             self.setGeometry(w_margin_x, w_margin_y, w_width, w_height)
         else:
             self.resize(w_width, w_height)

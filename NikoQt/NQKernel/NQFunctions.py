@@ -1,3 +1,6 @@
+import html
+
+
 def clear_layout(layout):
     if not layout:
         return
@@ -10,6 +13,10 @@ def clear_layout(layout):
 def clear_layout_margin(layout, space=0):
     layout.setSpacing(space)
     layout.setContentsMargins(space, space, space, space)
+
+
+def text_to_html(text):
+    return html.escape(str(text)).replace("\n", "<br/>").replace(" ", "&nbsp;")
 
 
 def color_line(line, color_hex=None, change_line=True):

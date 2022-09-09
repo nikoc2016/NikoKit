@@ -25,6 +25,7 @@ Protected
 check_list.slot_click()
 check_list.render_options()
 check_list.set_focus(option_name, set_check=True)
+check_list.set_focus_by_index(index, set_check=True)
 check_list.toggle_focus(option_name)
 """
 from NikoKit.NikoQt.NQAdapter import *
@@ -148,7 +149,10 @@ class NQWidgetCheckList(NQMixin, QListWidget):
             if option.checked:
                 checked.append(option.option_name)
         if self.exclusive:
-            return checked[0]
+            if len(checked):
+                return checked[0]
+            else:
+                return None
         else:
             return checked
 
@@ -160,8 +164,21 @@ class NQWidgetCheckList(NQMixin, QListWidget):
             for option in self.order_of_option:
                 option.checked = False
 
-        for option_name in option_names:
-            self.name_to_option[option_name].checked = True
+        checked_any = False
+
+        if option_names:
+            for option_name in option_names:
+                self.name_to_option[option_name].checked = True
+                checked_any = True
+
+        if self.exclusive and len(self.order_of_option) and not checked_any:
+            self.order_of_option[0].checked = True
+
+        self.render_options()
+
+    def set_checked_all(self, checked=True):
+        for option in self.order_of_option:
+            self.name_to_option[option.option_name] = checked
 
         self.render_options()
 
@@ -217,6 +234,9 @@ class NQWidgetCheckList(NQMixin, QListWidget):
 
         # Render
         self.render_options()
+
+    def set_focus_by_index(self, index, set_check=True):
+        self.set_focus(self.order_of_option[index].option_name, set_check=set_check)
 
     def toggle_focus(self, option_name):
         # Exclusive

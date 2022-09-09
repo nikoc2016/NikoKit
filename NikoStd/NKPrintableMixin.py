@@ -1,4 +1,4 @@
-class NKPrintableMixin:
+class NKPrintableMixin(object):
     def __init__(self, *args, **kwargs):
         super(NKPrintableMixin, self).__init__(*args, **kwargs)
 

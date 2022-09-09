@@ -30,6 +30,9 @@ class NQMixin(NKPrintableMixin):
 
     def lang(self, *args):
         if self.w_use_lang:
-            return NQApplication.Runtime.Service.NKLang.tran(*args)
+            result = ""
+            for arg in args:
+                result += NQApplication.Runtime.Service.NKLang.tran(arg)
+            return result
         else:
-            return ' '.join(args)
+            return ''.join(args)

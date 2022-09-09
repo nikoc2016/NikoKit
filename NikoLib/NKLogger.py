@@ -40,6 +40,7 @@ class NKLogger(NKPrintableMixin):
         super(NKLogger, self).__init__()
 
     def log(self, log_channel, log_type, log_context):
+        log_context = str(log_context)
         datetime_log = None
         now_datetime_str = NKDatetime.datetime_to_str(NKDatetime.now())
 

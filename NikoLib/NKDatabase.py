@@ -470,13 +470,12 @@ class NKMySQLConnector(object):
         Returns:
             list<dict> sql_data_unicode
         """
-        if not sql_data:
-            return sql_data
+        if isinstance(sql_data, list):
+            for line in sql_data:
+                for column in line.keys():
+                    try:
+                        line[column] = line[column].decode()
+                    except:
+                        pass
 
-        for line in sql_data:
-            for column in line.keys():
-                try:
-                    line[column] = line[column].decode()
-                except:
-                    pass
         return sql_data

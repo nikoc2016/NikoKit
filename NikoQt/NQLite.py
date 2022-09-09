@@ -13,14 +13,16 @@ class NQLite:
                  icon_res_name="",
                  runtime=None,
                  appdata_dir="",
-                 log_dir="",
+                 log_dir=None,  # None -> appdata_dir; "" -> No Log; "url" -> custom log
                  use_dummy=False,
+                 quit_on_last_window_closed=True,
                  enable_nk_logger=True,
                  enable_dark_theme=True,
                  enable_resource=True,
                  resource_patch=None,
                  enable_timer=True,
                  enable_window_manager=True,
+                 enable_tray_manager=False,
                  enable_appdata_manager=True,
                  enable_data_loader=True,
                  enable_nk_language=True
@@ -49,7 +51,7 @@ class NQLite:
 
         if not appdata_dir:
             appdata_dir = p.join(p.expanduser('~'), 'Documents', name)
-        if not log_dir:
+        if log_dir is None:
             log_dir = p.join(appdata_dir, "Logs")
 
         NQApplication.Runtime.App.name = name
@@ -65,8 +67,10 @@ class NQLite:
             NQApplication.Runtime.App.icon_res_name = icon_res_name
 
         NQApplication.load_basic(entry_py_path)
+        self.QApplication.setQuitOnLastWindowClosed(quit_on_last_window_closed)
+
         if enable_nk_logger:
-            NQApplication.load_service_nk_logger(log_dir)
+            NQApplication.load_service_nk_logger()
         if enable_resource:
             NQApplication.load_service_nq_resource(resource_patch)
         if enable_appdata_manager:
@@ -77,6 +81,8 @@ class NQLite:
             NQApplication.load_service_timer()
         if enable_window_manager:
             NQApplication.load_service_window_manager()
+        if enable_tray_manager:
+            NQApplication.load_service_tray_manager()
         if enable_data_loader:
             NQApplication.load_service_data_loader()
         if enable_dark_theme:

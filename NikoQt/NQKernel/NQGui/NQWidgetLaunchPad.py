@@ -1,23 +1,33 @@
 from NikoKit.NikoQt.NQAdapter import *
 from NikoKit.NikoQt.NQKernel import NQFunctions
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
+from NikoKit.NikoQt.NQKernel.NQGui.NQWidgetArea import NQWidgetArea
+from NikoKit.NikoStd.NKDataStructure import NKDataStructure
 
 
 class NQWidgetLaunchPad(NQWidget):
     signal_launch = Signal(str)
 
-    class LaunchTarget:
+    class LaunchTarget(NKDataStructure):
         def __init__(self,
                      value="",
                      label="",
+                     tooltip="",
+                     group="",
+                     group_display_name="",
                      size=150,
                      icon=None,
                      enabled=True):
             self.value = value
             self.label = label
+            self.tooltip = tooltip
+            self.group = group
+            self.group_display_name = group_display_name
             self.size = size
             self.icon = icon
             self.enabled = enabled
+
+            super(NQWidgetLaunchPad.LaunchTarget, self).__init__()
 
     class LaunchButton(QToolButton):
         def __init__(self,
@@ -26,6 +36,7 @@ class NQWidgetLaunchPad(NQWidget):
             self.value = launch_target.value
             self.setEnabled(launch_target.enabled)
             self.setIcon(launch_target.icon)
+            self.setToolTip(launch_target.tooltip)
             self.setIconSize(QSize(launch_target.size - 40, launch_target.size - 40))
             self.setFixedSize(QSize(launch_target.size, launch_target.size))
             self.setText(launch_target.label)
@@ -47,7 +58,7 @@ class NQWidgetLaunchPad(NQWidget):
         super(NQWidgetLaunchPad, self).__init__(*args, **kwargs)
 
     def construct(self):
-        main_lay = QGridLayout()
+        main_lay = QVBoxLayout()
         main_lay.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
 
         self.main_lay = main_lay
@@ -58,16 +69,36 @@ class NQWidgetLaunchPad(NQWidget):
 
     def render_buttons(self):
         NQFunctions.clear_layout(self.main_lay)
-        row_idx = 0
-        col_idx = 0
+
+        groups = {}
         for launch_value, launch_target in self.launch_targets.items():
+            if launch_target.group not in groups:
+                group_lay = QGridLayout()
+                group_area = NQWidgetArea(title=launch_target.group_display_name,
+                                          central_layout=group_lay)
+
+                groups[launch_target.group] = {
+                    "group": launch_target.group,
+                    "group_display_name": launch_target.group_display_name,
+                    "group_main_widget": group_area,
+                    "group_layout": group_lay,
+                    "group_row_idx": 0,
+                    "group_col_idx": 0
+                }
+
             new_launch_button = self.LaunchButton(launch_target)
             new_launch_button.clicked.connect(self.slot_launch_button_clicked)
-            self.main_lay.addWidget(new_launch_button, row_idx, col_idx, 1, 1)
-            col_idx += 1
-            if col_idx >= self.launch_btn_col_count:
-                col_idx = 0
-                row_idx += 1
+            grid_lay = groups[launch_target.group]["group_layout"]
+            grid_lay.addWidget(new_launch_button,
+                               groups[launch_target.group]["group_row_idx"],
+                               groups[launch_target.group]["group_col_idx"], 1, 1)
+            groups[launch_target.group]["group_col_idx"] += 1
+            if groups[launch_target.group]["group_col_idx"] >= self.launch_btn_col_count:
+                groups[launch_target.group]["group_col_idx"] = 0
+                groups[launch_target.group]["group_row_idx"] += 1
+
+        for group_name, group_dict in groups.items():
+            self.main_lay.addWidget(group_dict["group_main_widget"])
 
     def add_launch_target(self, launch_target, skip_render=False):
         self.launch_targets[launch_target.value] = launch_target

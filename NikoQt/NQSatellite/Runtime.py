@@ -1,13 +1,15 @@
-from NikoKit.NikoQt.NQApplication import NQRuntime
+from NikoKit.NikoQt.NQAdapter import Signal
+
+from NikoKit.NikoQt.NQApplication.NQRuntime import NQRuntime, DefaultSignals
+
+
+class NQSatelliteSignals(DefaultSignals):
+    cmd_broadcast = Signal(str, str)  # cmd_id, cmd_line
+    awake = Signal(str)  # Awake Signal
 
 
 class NQSatelliteRuntime(NQRuntime):
     class App(NQRuntime.App):
         admin_password = ""
 
-    class Gui(NQRuntime.Gui):
-        TrayIcon = None
-        TrayMenu = None
-        TrayMenuItems = None
-
-        WinLogs = None
+    Signals = NQSatelliteSignals()

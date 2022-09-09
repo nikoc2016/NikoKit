@@ -16,7 +16,7 @@ class ExeRuntime:
 
 
 def main():
-    ExeRuntime.compiled, ExeRuntime.my_dir, ExeRuntime.my_file_name, ExeRuntime.my_file_ext = get_exe_info()
+    ExeRuntime.compiled, ExeRuntime.my_dir, ExeRuntime.my_file_name, ExeRuntime.my_file_ext = get_exe_info(__file__)
     ExeRuntime.logger = NKLogger(log_dir=p.join(ExeRuntime.my_dir, ExeRuntime.my_file_name + "_LOGS"))
     print(f"NKExeArgs {NKDatetime.datetime_to_str(NKDatetime.now())}\n"
           f"Args:{sys.argv}\n"
