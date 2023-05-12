@@ -26,3 +26,19 @@ GLOBAL = "GLOBAL"
 UNGROUPED = "UNGROUPED"
 
 SYS_CHARSET = codecs.lookup(locale.getpreferredencoding()).name
+FILETYPES = {
+    "FILETYPE_IMAGE": ['pef', 'hv3', 'cbr', 'webp', 'bmp', 'jfif', 'cbz', 'j2k', 'tif', 'crw', 'raf',
+                       'rw2', 'png', 'jp2', 'arw', 'cb7', 'ugoria', 'jpeg', 'sr2', 'exif', 'j2c', 'jpf',
+                       'psd', 'wdp', 'tga', 'jpm', 'erf', 'mef', 'jpe', 'tiff', 'pnm', 'nrw', 'dng',
+                       'gif', 'apng', 'jpc', 'pbm', 'jpx', 'orf', 'cbt', 'mos', 'x3f', 'mrw', '3fr',
+                       'heif', 'bpg', 'jxr', 'srw', 'hdr', 'cr2', 'ppm', 'kdc', 'pcx', 'hdp', 'pgm',
+                       'dds', 'jpg', 'psb', 'nef'],
+    "FILETYPE_VIDEO": ["avi", "wmv", "wmp", "wm", "asf", "mpg", "mpeg", "mpe", "m1v", "m2v", "mpv2",
+                       "mp2v", "ts", "tp", "tpr", "trp", "vob", "ifo", "ogm", "ogv", "mp4", "m4v",
+                       "m4p", "m4b", "3gp", "3gpp", "3g2", "3gp2", "mkv", "rm", "ram", "rmvb", "rpm",
+                       "flv", "mov", "qt", "nsv", "dpg", "m2ts", "m2t", "mts", "dvr-ms", "k3g", "skm",
+                       "evo", "nsr", "amv", "divx", "webm", "wtv", "f4v", "mxf"],
+    "FILETYPE_AUDIO": ["wav", "wma", "mpa", "mp2", "m1a", "m2a", "mp3", "ogg", "m4a", "aac", "mka",
+                       "ra", "flac", "ape", "mpc", "mod", "ac3", "eac3", "dts", "dtshd", "wv", "tak",
+                       "cda", "dsf", "tta", "aiff", "aif", "opus", "amr"]
+}

@@ -6,7 +6,7 @@ from NikoKit.NikoStd.NKPrint import tprint
 
 
 class NKDatetime:
-    DT_FORMAT = '%Y-%m-%d_%H:%M:%S'
+    DT_FORMAT = '%Y-%m-%d_%H-%M-%S'
 
     @staticmethod
     def now():

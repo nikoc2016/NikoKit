@@ -175,6 +175,8 @@ class NKFile(NKDataStructure):
         if byte is None:
             try:
                 self.byte = p.getsize(path)
+                if not isinstance(self.byte, int):
+                    self.byte = -1
             except:
                 pass
         else:
@@ -193,6 +195,9 @@ class NKFile(NKDataStructure):
 
     def file_name_full(self):
         return p.basename(self.path)
+
+    def dir_url(self):
+        return p.dirname(self.path)
 
 
 class NKDir(NKDataStructure):
