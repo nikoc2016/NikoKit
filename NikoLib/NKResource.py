@@ -21,7 +21,10 @@ class NKResource:
 
     @staticmethod
     def pack_dir_to_res(res_dir, res_lib_path, ext_list=None):
-        if p.isdir(res_dir) and os.listdir(res_dir):
+        print(res_dir)
+        print(res_lib_path)
+        print(ext_list)
+        if p.isdir(res_dir):
 
             pack_targets = {}
             for root, dirs, files in os.walk(res_dir):

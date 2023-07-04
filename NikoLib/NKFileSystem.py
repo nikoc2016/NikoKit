@@ -2,6 +2,7 @@ import base64
 import errno
 import hashlib
 import io
+import json
 import os
 import os.path as p
 import shutil
@@ -65,6 +66,23 @@ def get_md5(file_path):
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
+
+
+# Encode a list or dictionary to BASE64
+def datastructure_to_base64(data):
+    json_str = json.dumps(data, ensure_ascii=False)
+    base64_bytes = base64.b64encode(json_str.encode("utf-8"))
+    base64_str = base64_bytes.decode("utf-8")
+    return base64_str
+
+
+# Restore BASE64-encoded string to its original form
+def base64_to_datastructure(base64_str):
+    base64_bytes = base64_str.encode("utf-8")
+    json_bytes = base64.b64decode(base64_bytes)
+    json_str = json_bytes.decode("utf-8")
+    data = json.loads(json_str)
+    return data
 
 
 def get_base64_from_file(file_path):

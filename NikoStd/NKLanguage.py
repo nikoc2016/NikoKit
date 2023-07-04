@@ -17,6 +17,8 @@ class NKLanguage:
                 "valid": u"合法",
                 "invalid": u"非法",
                 "analysis": u"分析",
+                "enable": u"启用",
+                "browse": u"浏览",
                 "day": u"日",
                 "week": u"周",
                 "month": u"月",
