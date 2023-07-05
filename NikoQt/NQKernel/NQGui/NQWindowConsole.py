@@ -1,4 +1,7 @@
 import html
+import os
+import sys
+
 import select
 import socket
 
@@ -92,7 +95,11 @@ class NQWindowConsole(NQWindow):
 class NQWindowPythonConsole(NQWindowConsole):
     def __init__(self, allow_execute=False, custom_commands=None, *args, **kwargs):
         self.log_records_count = 0
-        self.exec_dict = {"Runtime": NQApplication.Runtime, "log": NQApplication.Runtime.Service.NKLogger.log}
+        self.exec_dict = {"Runtime": NQApplication.Runtime,
+                          "log": NQApplication.Runtime.Service.NKLogger.log,
+                          "p": os.path,
+                          "os": os,
+                          "sys": sys}
         if isinstance(custom_commands, dict):
             self.exec_dict.update(custom_commands)
         super(NQWindowPythonConsole, self).__init__(allow_execute, *args, **kwargs)

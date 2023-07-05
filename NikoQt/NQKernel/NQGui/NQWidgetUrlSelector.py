@@ -10,18 +10,19 @@ class NQWidgetUrlSelector(NQWidget):
 
     signal_changed = Signal(str)
 
-    def __init__(self, title="URL:", mode=MODE_ALL):
+    def __init__(self, title="URL:", url="", mode=MODE_ALL):
         super().__init__()
 
         self.mode = mode
 
         self.main_lay = QHBoxLayout()
+        self.main_lay.setContentsMargins(2, 2, 2, 2)
         self.setLayout(self.main_lay)
 
         self.label = QLabel(title)
         self.main_lay.addWidget(self.label)
 
-        self.url_lineedit = QLineEdit()
+        self.url_lineedit = QLineEdit(url)
         self.main_lay.addWidget(self.url_lineedit)
 
         self.slot_browse_button = QPushButton(self.lang("browse"))
@@ -30,6 +31,9 @@ class NQWidgetUrlSelector(NQWidget):
         self.slot_browse_button.clicked.connect(self.slot_browse)
         self.url_lineedit.textChanged.connect(self.signal_changed.emit)
         self.main_lay.setStretchFactor(self.url_lineedit, 1)
+
+    def drop_urls(self, urls):
+        self.set_url(urls[-1])
 
     def norm_url(self):
         if self.url_lineedit.text().strip() != "":

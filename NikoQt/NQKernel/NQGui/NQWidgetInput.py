@@ -1,4 +1,5 @@
 import re
+import traceback
 
 from PySide2.QtCore import Signal
 
@@ -13,7 +14,7 @@ class NQWidgetInput(NQWidget):
     MODE_INT = 1
     MODE_DOUBLE = 2
 
-    signal_done = Signal()
+    signal_changed = Signal()
 
     def __init__(self, prompt="Question:", mode=MODE_TEXT, default_value="", min_value=None, max_value=None):
 
@@ -23,9 +24,11 @@ class NQWidgetInput(NQWidget):
         self.default_value = default_value
         self.min_value = min_value
         self.max_value = max_value
+        self.last_valid_input = ""
 
         # GUI Components
         self.layout = QHBoxLayout()
+        self.layout.setContentsMargins(2, 2, 2, 2)
         self.label = QLabel(self.prompt)
         self.line_edit = QLineEdit()
         self.layout.addWidget(self.label)
@@ -50,13 +53,18 @@ class NQWidgetInput(NQWidget):
         super().connect_signals()
         self.line_edit.editingFinished.connect(self.normalize)
 
+    def drop_urls(self, urls):
+        if len(urls) == 1:
+            self.set_value(urls[0])
+        else:
+            self.set_value(",".join(['"' + url + '"' for url in urls]))
+
     def set_value(self, value):
         self.line_edit.setText(value)
         self.normalize(no_signal=True)
 
     def get_value(self):
-        self.normalize(no_signal=True)
-        return self.line_edit.text()
+        return self.last_valid_input
 
     def normalize(self, no_signal=False):
         text = self.line_edit.text()
@@ -102,5 +110,7 @@ class NQWidgetInput(NQWidget):
         elif self.mode == self.MODE_TEXT:
             pass
 
-        if not no_signal:
-            self.signal_done.emit()
+        if self.line_edit.text() != self.last_valid_input:
+            self.last_valid_input = self.line_edit.text()
+            if not no_signal:
+                self.signal_changed.emit()

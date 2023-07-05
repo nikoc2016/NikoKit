@@ -57,7 +57,7 @@ class NKAppDataManager(NKPrintableMixin):
         appdata_path = p.join(self.appdata_root, appdata_name + self.appdata_ext)
         scout(appdata_path)
         with open(appdata_path, "w", encoding="utf-8") as f:
-            json.dump(self.appdata_objects[appdata_name], f, ensure_ascii=False)
+            json.dump(self.appdata_objects[appdata_name], f, ensure_ascii=False, indent=2)
 
     def load(self, appdata_name):
         appdata_path = p.join(self.appdata_root, appdata_name + self.appdata_ext)

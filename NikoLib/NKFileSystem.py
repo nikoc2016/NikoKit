@@ -9,6 +9,8 @@ import shutil
 import sys
 import tempfile
 
+import psutil
+
 from NikoKit.NikoStd.NKDataStructure import NKDataStructure
 
 
@@ -58,6 +60,19 @@ def get_exe_info(entry_py_path):
         my_file_ext = p.splitext(p.basename(entry_py_path))[1]
 
     return compiled, my_dir, my_file_name, my_file_ext
+
+
+def is_proc_running(process_name):
+    # Iterate over all running process
+    for proc in psutil.process_iter():
+        try:
+            # Check if process name contains the given name string.
+            if process_name.lower() in proc.name().lower():
+                return True
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return False
+
 
 
 def get_md5(file_path):

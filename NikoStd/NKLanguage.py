@@ -107,7 +107,8 @@ class NKLanguage:
                 "number": "数字",
                 "succeed": "成功",
                 "fail": "失败",
-                "result": "结果"
+                "result": "结果",
+                "save_settings": "保存设置",
             }
         }
         self.chosen_language = NKConst.ZH_CN

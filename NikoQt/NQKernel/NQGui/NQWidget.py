@@ -1,3 +1,4 @@
+import os.path as p
 from NikoKit.NikoQt.NQAdapter import QWidget
 from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQMixin
 
@@ -48,3 +49,14 @@ class NQGhost:
 class NQWidget(NQMixin, QWidget):
     def __init__(self, *args, **kwargs):
         super(NQWidget, self).__init__(*args, **kwargs)
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        self.drop_urls([p.normpath(url.toLocalFile()) for url in event.mimeData().urls()])
+
+    def drop_urls(self, urls):
+        pass
