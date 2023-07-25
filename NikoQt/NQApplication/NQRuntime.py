@@ -74,5 +74,7 @@ class NQRuntime(QObject):
         pc_name = socket.gethostname()
         ip = socket.gethostbyname(pc_name)
         username = str(getpass.getuser())
-        active_directory = socket.getfqdn().split(".")[1]
+        fqdn = socket.getfqdn()
+        fqdn_parts = fqdn.split(".")
+        active_directory = fqdn_parts[1] if len(fqdn_parts) > 1 else fqdn
         hardware_snapshot = None
