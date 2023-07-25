@@ -6,6 +6,7 @@ class NKLanguage:
     def __init__(self):
         self.dictionaries = {
             NKConst.ZH_CN: {
+                "backup": u"备份",
                 "UNLOAD": u"未加载",
                 "LOADING": u"加载中",
                 "UPDATING": u"更新中",
@@ -18,11 +19,16 @@ class NKLanguage:
                 "invalid": u"非法",
                 "analysis": u"分析",
                 "enable": u"启用",
+                "disable": u"禁用",
+                "disabled": u"已禁用",
                 "browse": u"浏览",
                 "day": u"日",
                 "week": u"周",
                 "month": u"月",
                 "year": u"年",
+                "hour": u"小时",
+                "minute": u"分钟",
+                "second": u"秒",
                 "start": u"开始",
                 "end": u"结束",
                 "name": u"名字",
@@ -101,7 +107,9 @@ class NKLanguage:
                 "select": "选择",
                 "confirm": "确定",
                 "refresh": "刷新",
+                "frequency": "频率",
                 "tool": "工具",
+                "module": "模块",
                 "search": "搜索",
                 "seat": "座位",
                 "number": "数字",
@@ -109,6 +117,18 @@ class NKLanguage:
                 "fail": "失败",
                 "result": "结果",
                 "save_settings": "保存设置",
+                "compress": "压缩",
+                "7z_compress_src": "压缩文件夹",
+                "7z_out_dir": "输出文件夹",
+                "7z_out_filename": "输出文件名",
+                "7z_compress_level": "压缩等级(L)",
+                "7z_dictionary_size": "字典大小(D)",
+                "7z_word_size": "单词大小(W)",
+                "7z_solid_block_size": "固实数据大小",
+                "7z_cpu_threads": "CPU线程数(最多%i)",
+                "7z_memory_usage": "允许使用的系统内存",
+                "7z_split_to_volumes_mb": "分卷大小(MB)",
+                "7z_remove_src": "操作完成后删除源文件",
             }
         }
         self.chosen_language = NKConst.ZH_CN

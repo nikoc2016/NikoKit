@@ -11,8 +11,9 @@ from PySide2.QtCore import QObject, QTimer, QDateTime, Signal, Qt, QEvent, QSize
     QEasingCurve, QAbstractAnimation, Property, QRegExp, QCoreApplication, QSettings, QAbstractTableModel, \
     QMetaObject, QFile
 from PySide2.QtGui import QPalette, QColor, QPixmap, QIcon, QTextCursor, QMovie, QBrush, QPainter, QImage, qRgb, \
-    QStandardItemModel, QStandardItem, QPen, QCursor, QSyntaxHighlighter, QTextCharFormat, QFont
+    QStandardItemModel, QStandardItem, QPen, QCursor, QSyntaxHighlighter, QTextCharFormat, QFont, QFontMetrics
 from PySide2.QtUiTools import QUiLoader
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
+from PySide2.QtGui import QIntValidator, QDoubleValidator, QValidator

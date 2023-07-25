@@ -1,12 +1,8 @@
 import re
-import traceback
-
-from PySide2.QtCore import Signal
 
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
-
-from PySide2.QtWidgets import QLabel, QLineEdit, QHBoxLayout
-from PySide2.QtGui import QIntValidator, QDoubleValidator, QValidator
+from NikoKit.NikoQt.NQAdapter import Signal, QLabel, QHBoxLayout, QSizePolicy, Qt
+from NikoKit.NikoQt.NQKernel.NQGui.NQWidgetAutoLineEdit import NQWidgetAutoLineEdit
 
 
 class NQWidgetInput(NQWidget):
@@ -16,7 +12,13 @@ class NQWidgetInput(NQWidget):
 
     signal_changed = Signal()
 
-    def __init__(self, prompt="Question:", mode=MODE_TEXT, default_value="", min_value=None, max_value=None):
+    def __init__(self,
+                 prompt="Question:",
+                 mode=MODE_TEXT,
+                 default_value="",
+                 min_value=None,
+                 max_value=None,
+                 stretch_in_the_end=False):
 
         # Variables
         self.mode = mode
@@ -29,10 +31,15 @@ class NQWidgetInput(NQWidget):
         # GUI Components
         self.layout = QHBoxLayout()
         self.layout.setContentsMargins(2, 2, 2, 2)
-        self.label = QLabel(self.prompt)
-        self.line_edit = QLineEdit()
-        self.layout.addWidget(self.label)
+        self.layout.setAlignment(Qt.AlignCenter)
+        self.line_edit = NQWidgetAutoLineEdit()
+        if self.prompt:
+            prompt = QLabel(self.prompt)
+            prompt.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+            self.layout.addWidget(prompt)
         self.layout.addWidget(self.line_edit)
+        if stretch_in_the_end:
+            self.layout.addStretch()
 
         # Default Value
         if not self.default_value:
@@ -42,10 +49,11 @@ class NQWidgetInput(NQWidget):
                 self.default_value = "0"
             elif self.mode == self.MODE_DOUBLE:
                 self.default_value = "0.0"
-        self.line_edit.setText(str(self.default_value))
+        self.set_value(str(self.default_value))
 
         super().__init__()
 
+        self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         self.setLayout(self.layout)
         self.normalize(no_signal=True)
 
@@ -70,8 +78,11 @@ class NQWidgetInput(NQWidget):
         text = self.line_edit.text()
 
         if self.mode == self.MODE_INT:
-            # Remove all non-numeric characters
-            text = re.sub(r'\D', '', text)
+            # Replace all non-digit characters except a leading negative sign
+            if "-" in text:
+                text = "-" + re.sub(r'\D', '', text)
+            else:
+                text = re.sub(r'\D', '', text)
             if not text:  # If there is no number after normalization, use min_value
                 if self.min_value is not None:
                     text = str(self.min_value)

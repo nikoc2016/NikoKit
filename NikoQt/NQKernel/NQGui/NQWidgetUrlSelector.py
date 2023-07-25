@@ -6,11 +6,11 @@ import os
 class NQWidgetUrlSelector(NQWidget):
     MODE_PATH = 1
     MODE_DIR = 2
-    MODE_ALL = 3
+    # MODE_ALL = 3 Deprecated because of Qt unsupported
 
     signal_changed = Signal(str)
 
-    def __init__(self, title="URL:", url="", mode=MODE_ALL):
+    def __init__(self, title="URL:", url="", mode=MODE_PATH):
         super().__init__()
 
         self.mode = mode
@@ -56,8 +56,9 @@ class NQWidgetUrlSelector(NQWidget):
             file_dialog = QFileDialog.getExistingDirectory(self, "Select Directory")
             if file_dialog:
                 self.set_url(file_dialog)
-        elif self.mode == self.MODE_ALL:
-            file_dialog = QFileDialog.getOpenFileName(self, "Select File or Directory")
-            if file_dialog[0]:
-                self.set_url(file_dialog[0])
+        # Not Working
+        # elif self.mode == self.MODE_ALL:
+        #     file_dialog = QFileDialog.getOpenFileName(self, "Select File or Directory")
+        #     if file_dialog[0]:
+        #         self.set_url(file_dialog[0])
         self.norm_url()
