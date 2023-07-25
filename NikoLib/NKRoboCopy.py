@@ -29,7 +29,7 @@ class NKRoboCopy:
         file_dir = os.path.dirname(source_path)
 
         # Run Command
-        command_line = ['robocopy', file_dir, target_dir, file_name]
+        command_line = ['robocopy', '/R:0', '/W:0', file_dir, target_dir, file_name]
         process = NKLaunch.run_pipe(command_line)
         error_message = NKRoboCopy.handle_stdout(process=process, silent_mode=silent_mode)
 
@@ -41,7 +41,7 @@ class NKRoboCopy:
             print(f"NKRoboCopy::Source dir not exists({source_dir})")
 
         # Run Command
-        command_line = ['robocopy', '/E', source_dir, target_dir]
+        command_line = ['robocopy', '/R:0', '/W:0', '/E', source_dir, target_dir]
         process = NKLaunch.run_pipe(command_line)
         error_message = NKRoboCopy.handle_stdout(process=process, silent_mode=silent_mode)
 
@@ -53,7 +53,7 @@ class NKRoboCopy:
             print(f"NKRoboCopy::Source dir not exists({source_dir})")
 
         # Run Command
-        command_line = ['robocopy', '/MIR', source_dir, target_dir]
+        command_line = ['robocopy', '/R:0', '/W:0', '/MIR', source_dir, target_dir]
         process = NKLaunch.run_pipe(command_line)
         error_message = NKRoboCopy.handle_stdout(process=process, silent_mode=silent_mode)
 
