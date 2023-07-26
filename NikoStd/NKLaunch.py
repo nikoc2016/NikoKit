@@ -210,6 +210,8 @@ def example_pipe_handling(process):
 #                    custom_env={"NKLaunch": "Superb", "NKLaunch2": "Superb2"},
 #                    )
 #
+# NKLaunch.run(...).wait() # Blocking
+#
 # NKLaunch.run_system([r"D:\NKZipTest\args.exe", "hello", "destination is here"])
 #
 # process = NKLaunch.run_pipe(

@@ -6,8 +6,10 @@ import json
 import os
 import os.path as p
 import shutil
+import stat
 import sys
 import tempfile
+from subprocess import call
 
 import psutil
 
@@ -72,7 +74,6 @@ def is_proc_running(process_name):
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
     return False
-
 
 
 def get_md5(file_path):
@@ -155,6 +156,46 @@ def delete_try(url):
 
 
 def boom_dir(target_dir, remove_root=True):
+    if not os.path.isdir(target_dir):
+        return True
+
+    def on_rm_error(func, path, exc_info):
+        os.chmod(path, stat.S_IWRITE)
+        os.unlink(path)
+
+    # First remove all files
+    for root, _, files in os.walk(target_dir, topdown=False):
+        for name in files:
+            file_path = os.path.join(root, name)
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                is_empty_folder = False
+
+    # Then remove all directories
+    for root, dirs, _ in os.walk(target_dir, topdown=False):
+        for name in dirs:
+            dir_path = os.path.join(root, name)
+            try:
+                shutil.rmtree(dir_path)
+            except:
+                call(['attrib', '-H', dir_path])
+                shutil.rmtree(dir_path, onerror=on_rm_error)
+
+    # Remove root if necessary
+    if remove_root:
+        try:
+            call(['attrib', '-H', target_dir])
+            shutil.rmtree(target_dir, onerror=on_rm_error)
+        except:
+            pass
+
+    if p.isdir(target_dir) and len(list(os.listdir(target_dir))) > 0:
+        return False
+    return True
+
+
+def boom_dir_legacy(target_dir, remove_root=True):
     if not p.isdir(target_dir):
         return True
     is_empty_folder = True
