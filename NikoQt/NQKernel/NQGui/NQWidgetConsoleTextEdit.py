@@ -1,5 +1,9 @@
+from typing import List, Tuple, Union
+
+import html as htool
 from NikoKit.NikoQt.NQAdapter import *
 from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQMixin
+from NikoKit.NikoQt.NQKernel.NQFunctions import color_line
 
 
 class NQWidgetConsoleTextEdit(QTextEdit, NQMixin):
@@ -15,11 +19,21 @@ class NQWidgetConsoleTextEdit(QTextEdit, NQMixin):
         self.setLineWrapMode(QTextEdit.NoWrap)
         self.setReadOnly(True)
 
-    def setHtml(self, html):
-        if self.html_cache != html:
+    # [(str_line, str_color_hex), ...] Smart Rendering
+    def render_lines(self, lines: List[Tuple[str, Union[str, None]]]):
+        html = ""
+        for line, color_hex in lines:
+            line = htool.escape(line).replace("\r\n", "<br>").replace("\n", "<br>")
+            html += color_line(line,
+                               color_hex=color_hex,
+                               change_line=True)
+        self.setHtml(html)
+
+    def setHtml(self, html_text):
+        if self.html_cache != html_text:
             self.smart_scroll_prepare()
-            self.html_cache = html
-            super(NQWidgetConsoleTextEdit, self).setHtml(html)
+            self.html_cache = html_text
+            super(NQWidgetConsoleTextEdit, self).setHtml(html_text)
             self.smart_scroll()
 
     def setText(self, text):
