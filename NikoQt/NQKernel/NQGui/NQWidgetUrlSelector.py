@@ -49,11 +49,11 @@ class NQWidgetUrlSelector(NQWidget):
 
     def slot_browse(self):
         if self.mode == self.MODE_PATH:
-            file_dialog = QFileDialog.getOpenFileName(self, "Select File")
+            file_dialog = QFileDialog.getOpenFileName(self, "Select File", self.get_url())
             if file_dialog[0]:
                 self.set_url(file_dialog[0])
         elif self.mode == self.MODE_DIR:
-            file_dialog = QFileDialog.getExistingDirectory(self, "Select Directory")
+            file_dialog = QFileDialog.getExistingDirectory(self, "Select Directory", self.get_url())
             if file_dialog:
                 self.set_url(file_dialog)
         # Not Working

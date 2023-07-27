@@ -23,6 +23,8 @@ def main():
           f"Compiled:{ExeRuntime.compiled}\n"
           f"Dir:{ExeRuntime.my_dir}\n"
           f"File:{ExeRuntime.my_file_name + ExeRuntime.my_file_ext}")
+    for key, value in os.environ.items():
+        print(f"Env:{key}->{value}")
     os.system("pause>nul")
 
 
