@@ -18,6 +18,7 @@ class NQWidgetInput(NQWidget):
                  default_value="",
                  min_value=None,
                  max_value=None,
+                 min_width=10,
                  stretch_in_the_end=False):
 
         # Variables
@@ -32,7 +33,7 @@ class NQWidgetInput(NQWidget):
         self.layout = QHBoxLayout()
         self.layout.setContentsMargins(2, 2, 2, 2)
         self.layout.setAlignment(Qt.AlignCenter)
-        self.line_edit = NQWidgetAutoLineEdit()
+        self.line_edit = NQWidgetAutoLineEdit(min_width=min_width)
         if self.prompt:
             prompt = QLabel(self.prompt)
             prompt.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)

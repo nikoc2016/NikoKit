@@ -2,11 +2,11 @@ from typing import List, Tuple, Union
 
 import html as htool
 from NikoKit.NikoQt.NQAdapter import *
-from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQMixin
 from NikoKit.NikoQt.NQKernel.NQFunctions import color_line
+from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQMixin
 
 
-class NQWidgetConsoleTextEdit(QTextEdit, NQMixin):
+class NQWidgetConsoleTextEdit(NQMixin, QTextEdit):
     def __init__(self, auto_scroll=True, *args, **kwargs):
         self.scroll_bar_value = 0
         self.auto_scroll = auto_scroll
@@ -21,13 +21,22 @@ class NQWidgetConsoleTextEdit(QTextEdit, NQMixin):
 
     # [(str_line, str_color_hex), ...] Smart Rendering
     def render_lines(self, lines: List[Tuple[str, Union[str, None]]]):
-        html = ""
+        html_context = ""
         for line, color_hex in lines:
             line = htool.escape(line).replace("\r\n", "<br>").replace("\n", "<br>")
-            html += color_line(line,
-                               color_hex=color_hex,
-                               change_line=True)
-        self.setHtml(html)
+            html_context += color_line(line,
+                                       color_hex=color_hex,
+                                       change_line=True)
+        self.scroll_bar_value = 0
+        self.ready_to_scroll = False
+        self.html_cache = ""
+        self.text_cache = ""
+        self.setHtml(html_context)
+
+    def clear(self):
+        self.html_cache = ""
+        self.text_cache = ""
+        super().clear()
 
     def setHtml(self, html_text):
         if self.html_cache != html_text:

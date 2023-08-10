@@ -2,9 +2,10 @@ from NikoKit.NikoQt.NQAdapter import QLineEdit, QFontMetrics, QSizePolicy
 
 
 class NQWidgetAutoLineEdit(QLineEdit):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, min_width=10, *args, **kwargs):
         super(NQWidgetAutoLineEdit, self).__init__(*args, **kwargs)
-        self.setMinimumWidth(10)
+        self.min_width = min_width
+        self.setMinimumWidth(min_width)
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         self.textChanged.connect(self.adjust_width)
         self.adjust_width("")
@@ -17,6 +18,8 @@ class NQWidgetAutoLineEdit(QLineEdit):
         # Add some padding to the width
         new_width = text_width + 10
         # Set the new width
+        if new_width < self.min_width:
+            new_width = self.min_width
         self.setFixedWidth(new_width)
 
     def keyPressEvent(self, event):

@@ -1,4 +1,5 @@
 from NikoKit.NikoQt.NQAdapter import QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, Signal
+from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQDropMixin
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
 import os
 
@@ -22,12 +23,13 @@ class NQWidgetUrlSelector(NQWidget):
         self.label = QLabel(title)
         self.main_lay.addWidget(self.label)
 
-        self.url_lineedit = QLineEdit(url)
+        self.url_lineedit = DroppableLineEdit(url)
         self.main_lay.addWidget(self.url_lineedit)
 
         self.slot_browse_button = QPushButton(self.lang("browse"))
         self.main_lay.addWidget(self.slot_browse_button)
 
+        self.url_lineedit.url_dropped.connect(self.set_url)
         self.slot_browse_button.clicked.connect(self.slot_browse)
         self.url_lineedit.textChanged.connect(self.signal_changed.emit)
         self.main_lay.setStretchFactor(self.url_lineedit, 1)
@@ -56,9 +58,15 @@ class NQWidgetUrlSelector(NQWidget):
             file_dialog = QFileDialog.getExistingDirectory(self, "Select Directory", self.get_url())
             if file_dialog:
                 self.set_url(file_dialog)
-        # Not Working
-        # elif self.mode == self.MODE_ALL:
-        #     file_dialog = QFileDialog.getOpenFileName(self, "Select File or Directory")
-        #     if file_dialog[0]:
-        #         self.set_url(file_dialog[0])
         self.norm_url()
+
+
+class DroppableLineEdit(NQDropMixin, QLineEdit):
+    url_dropped = Signal(str)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def drop_urls(self, urls):
+        if urls:
+            self.url_dropped.emit(urls[-1])

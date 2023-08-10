@@ -1,6 +1,6 @@
 # Note: Remember to register your widget by modifying NQGui.register_all_widgets()
 from uuid import uuid4
-
+import os.path as p
 from NikoKit.NikoQt import NQApplication
 from NikoKit.NikoStd.NKPrintableMixin import NKPrintableMixin
 
@@ -33,3 +33,19 @@ class NQMixin(NKPrintableMixin):
             return NQApplication.Runtime.Service.NKLang.tran(*args)
         else:
             return ' '.join(args)
+
+
+class NQDropMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        self.drop_urls([p.normpath(url.toLocalFile()) for url in event.mimeData().urls()])
+
+    def drop_urls(self, urls):
+        print(self.__class__, urls)
