@@ -36,14 +36,19 @@ class NKRoboCopy:
         return error_message
 
     @staticmethod
-    def copy_dir_to_dir(source_dir, target_dir, silent_mode=True):
+    def copy_dir_to_dir(source_dir, target_dir, except_dirs=None, silent_mode=True):
         if not p.isdir(source_dir):
             print(f"NKRoboCopy::Source dir not exists({source_dir})")
 
         # Run Command
         command_line = ['robocopy', '/R:0', '/W:0', '/E', source_dir, target_dir]
+        if isinstance(except_dirs, list) and len(except_dirs) > 0:
+            command_line.append(r"/XD")
+            for except_dir in except_dirs:
+                command_line.append(except_dir)
         process = NKLaunch.run_pipe(command_line)
         error_message = NKRoboCopy.handle_stdout(process=process, silent_mode=silent_mode)
+        print(error_message)
 
         return error_message
 
