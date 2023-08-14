@@ -1,5 +1,9 @@
 import html
 
+from PySide2.QtWidgets import QWidget
+
+from NikoKit.NikoQt.NQAdapter import QHBoxLayout, QVBoxLayout
+
 
 def clear_layout(layout):
     if not layout:
@@ -8,6 +12,20 @@ def clear_layout(layout):
         widget_to_remove = layout.itemAt(i).widget()
         layout.removeWidget(widget_to_remove)
         widget_to_remove.setParent(None)
+
+
+def lay(contents, vertical=True, lead_stretch=True, end_stretch=True):
+    base_lay = QVBoxLayout() if vertical else QHBoxLayout()
+    if lead_stretch:
+        base_lay.addStretch()
+    for content in contents:
+        try:
+            base_lay.addWidget(content)
+        except:
+            base_lay.addLayout(content)
+    if end_stretch:
+        base_lay.addStretch()
+    return base_lay
 
 
 def clear_layout_margin(layout, space=0):

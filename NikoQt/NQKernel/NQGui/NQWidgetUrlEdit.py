@@ -1,7 +1,6 @@
-from PySide2.QtCore import Signal
-from PySide2.QtWidgets import QVBoxLayout, QHBoxLayout, QPushButton
-import os.path as p
 
+import os.path as p
+from NikoKit.NikoQt.NQAdapter import Signal, QVBoxLayout, QHBoxLayout, QPushButton
 from NikoKit.NikoQt.NQKernel.NQFunctions import clear_layout_margin
 from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQDropMixin
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget

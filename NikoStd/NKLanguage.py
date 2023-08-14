@@ -16,6 +16,7 @@ class NKLanguage:
                 "ALL": u"全部",
                 "UNGROUPED": u"未分组",
                 "advance_setting": u"高级设置",
+                "copy": u"复制",
                 "valid": u"合法",
                 "invalid": u"非法",
                 "analysis": u"分析",
