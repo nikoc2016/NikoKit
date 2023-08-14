@@ -1,6 +1,9 @@
 # Note: Remember to register your widget by modifying NQGui.register_all_widgets()
 from uuid import uuid4
 import os.path as p
+
+from PySide2 import QtCore, QtGui
+
 from NikoKit.NikoQt import NQApplication
 from NikoKit.NikoStd.NKPrintableMixin import NKPrintableMixin
 
@@ -46,6 +49,11 @@ class NQDropMixin:
 
     def dropEvent(self, event):
         self.drop_urls([p.normpath(url.toLocalFile()) for url in event.mimeData().urls()])
+        mime_data = QtCore.QMimeData()
+        mime_data.setText("")
+        dummy_event = QtGui.QDropEvent(event.posF(), event.possibleActions(),
+                                       mime_data, event.mouseButtons(), event.keyboardModifiers())
+        super().dropEvent(dummy_event)
 
     def drop_urls(self, urls):
         print(self.__class__, urls)

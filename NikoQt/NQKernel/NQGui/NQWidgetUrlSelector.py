@@ -1,4 +1,5 @@
 from NikoKit.NikoQt.NQAdapter import QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, Signal
+from NikoKit.NikoQt.NQKernel.NQFunctions import clear_layout_margin
 from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQDropMixin
 from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
 import os
@@ -17,7 +18,7 @@ class NQWidgetUrlSelector(NQWidget):
         self.mode = mode
 
         self.main_lay = QHBoxLayout()
-        self.main_lay.setContentsMargins(2, 2, 2, 2)
+        clear_layout_margin(self.main_lay, 2)
         self.setLayout(self.main_lay)
 
         self.label = QLabel(title)

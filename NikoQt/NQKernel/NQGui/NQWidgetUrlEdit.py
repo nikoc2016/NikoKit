@@ -66,7 +66,6 @@ class NQWidgetUrlEdit(NQWidget):
         for url in urls:
             unique_urls.add(url)
         unique_urls = sorted(list(unique_urls))
-        self.url_edit.setText(self.url_edit.toPlainText())
         self.url_edit.setText("\n".join(unique_urls))
 
     def add_urls(self, urls):

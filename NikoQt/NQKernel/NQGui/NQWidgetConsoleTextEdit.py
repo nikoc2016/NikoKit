@@ -39,6 +39,7 @@ class NQWidgetConsoleTextEdit(NQMixin, QTextEdit):
         super().clear()
 
     def setHtml(self, html_text):
+        self.html_cache = self.toHtml()
         if self.html_cache != html_text:
             self.smart_scroll_prepare()
             self.html_cache = html_text
@@ -46,6 +47,7 @@ class NQWidgetConsoleTextEdit(NQMixin, QTextEdit):
             self.smart_scroll()
 
     def setText(self, text):
+        self.text_cache = self.toPlainText()
         if self.text_cache != text:
             self.smart_scroll_prepare()
             self.text_cache = text
