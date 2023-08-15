@@ -13,6 +13,7 @@ from subprocess import call
 
 import psutil
 
+from NikoKit.NikoStd import NKConst
 from NikoKit.NikoStd.NKDataStructure import NKDataStructure
 
 
@@ -84,19 +85,29 @@ def get_md5(file_path):
     return hash_md5.hexdigest()
 
 
+def str_to_base64(original_string):
+    encoded_bytes = original_string.encode(NKConst.SYS_CHARSET)  # Convert string to bytes using system encoding
+    base64_encoded = base64.b64encode(encoded_bytes)  # Encode bytes to base64
+    base64_encoded_string = base64_encoded.decode(NKConst.SYS_CHARSET)  # Convert bytes to string
+    return base64_encoded_string
+
+
+def base64_to_string(base64_str):
+    base64_encoded_bytes = base64_str.encode(NKConst.SYS_CHARSET)  # Convert base64 string to bytes
+    decoded_bytes = base64.b64decode(base64_encoded_bytes)  # Decode base64 bytes
+    original_string = decoded_bytes.decode(NKConst.SYS_CHARSET)  # Convert bytes to original string
+    return original_string
+
+
 # Encode a list or dictionary to BASE64
 def datastructure_to_base64(data):
     json_str = json.dumps(data, ensure_ascii=False)
-    base64_bytes = base64.b64encode(json_str.encode("utf-8"))
-    base64_str = base64_bytes.decode("utf-8")
-    return base64_str
+    return str_to_base64(json_str)
 
 
 # Restore BASE64-encoded string to its original form
 def base64_to_datastructure(base64_str):
-    base64_bytes = base64_str.encode("utf-8")
-    json_bytes = base64.b64decode(base64_bytes)
-    json_str = json_bytes.decode("utf-8")
+    json_str = base64_to_string(base64_str)
     data = json.loads(json_str)
     return data
 

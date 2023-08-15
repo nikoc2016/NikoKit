@@ -19,14 +19,30 @@ class NQWidgetConsoleTextEdit(NQMixin, QTextEdit):
         self.setLineWrapMode(QTextEdit.NoWrap)
         self.setReadOnly(True)
 
+    @staticmethod
+    def html_escape(text):
+        return str(htool.escape(text)
+                   .replace("\r\n", "<br>")
+                   .replace("\n", "<br>")
+                   .replace(" ", "&nbsp;"))
+
     # [(str_line, str_color_hex), ...] Smart Rendering
     def render_lines(self, lines: List[Tuple[str, Union[str, None]]]):
         html_context = ""
-        for line, color_hex in lines:
-            line = htool.escape(line).replace("\r\n", "<br>").replace("\n", "<br>")
-            html_context += color_line(line,
+        for raw_line, color_hex in lines:
+            html_context += color_line(line=self.html_escape(raw_line),
                                        color_hex=color_hex,
                                        change_line=True)
+        self.scroll_bar_value = 0
+        self.ready_to_scroll = False
+        self.html_cache = ""
+        self.text_cache = ""
+        self.setHtml(html_context)
+
+    def render_text(self, text: str, color_hex: str = None):
+        html_context = color_line(line=self.html_escape(text),
+                                  color_hex=color_hex,
+                                  change_line=False)
         self.scroll_bar_value = 0
         self.ready_to_scroll = False
         self.html_cache = ""
