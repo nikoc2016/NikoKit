@@ -1,4 +1,4 @@
-import html
+import html as htool
 
 from PySide2.QtWidgets import QWidget, QLayout
 
@@ -46,8 +46,11 @@ def clear_layout_margin(layout, space=0):
     layout.setContentsMargins(space, space, space, space)
 
 
-def text_to_html(text):
-    return html.escape(str(text)).replace("\n", "<br/>").replace(" ", "&nbsp;")
+def html_escape(text):
+    return str(htool.escape(text)
+               .replace("\r\n", "<br>")
+               .replace("\n", "<br>")
+               .replace(" ", "&nbsp;"))
 
 
 def color_line(line: str, color_hex: str = None, change_line: bool = True):

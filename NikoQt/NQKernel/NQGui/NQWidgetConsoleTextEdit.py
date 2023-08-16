@@ -1,8 +1,6 @@
 from typing import List, Tuple, Union
-
-import html as htool
 from NikoKit.NikoQt.NQAdapter import *
-from NikoKit.NikoQt.NQKernel.NQFunctions import color_line
+from NikoKit.NikoQt.NQKernel.NQFunctions import color_line, html_escape
 from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQMixin
 
 
@@ -19,18 +17,11 @@ class NQWidgetConsoleTextEdit(NQMixin, QTextEdit):
         self.setLineWrapMode(QTextEdit.NoWrap)
         self.setReadOnly(True)
 
-    @staticmethod
-    def html_escape(text):
-        return str(htool.escape(text)
-                   .replace("\r\n", "<br>")
-                   .replace("\n", "<br>")
-                   .replace(" ", "&nbsp;"))
-
     # [(str_line, str_color_hex), ...] Smart Rendering
     def render_lines(self, lines: List[Tuple[str, Union[str, None]]]):
         html_context = ""
         for raw_line, color_hex in lines:
-            html_context += color_line(line=self.html_escape(raw_line),
+            html_context += color_line(line=html_escape(raw_line),
                                        color_hex=color_hex,
                                        change_line=True)
         self.scroll_bar_value = 0
@@ -40,7 +31,7 @@ class NQWidgetConsoleTextEdit(NQMixin, QTextEdit):
         self.setHtml(html_context)
 
     def render_text(self, text: str, color_hex: str = None):
-        html_context = color_line(line=self.html_escape(text),
+        html_context = color_line(line=html_escape(text),
                                   color_hex=color_hex,
                                   change_line=False)
         self.scroll_bar_value = 0
