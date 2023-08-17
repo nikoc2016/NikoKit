@@ -28,12 +28,16 @@ check_list.set_focus(option_name, set_check=True)
 check_list.set_focus_by_index(index, set_check=True)
 check_list.toggle_focus(option_name)
 """
+from typing import Dict, List
+
 from NikoKit.NikoQt.NQAdapter import *
-from NikoKit.NikoQt.NQKernel.NQGui.NQMixin import NQMixin
+from NikoKit.NikoQt.NQKernel.NQFunctions import clear_layout_margin, lay
+from NikoKit.NikoQt.NQKernel.NQGui.NQWidget import NQWidget
 from NikoKit.NikoStd.NKPrintableMixin import NKPrintableMixin
+from NikoKit.NikoQt import NQApplication
 
 
-class NQWidgetCheckList(NQMixin, QListWidget):
+class NQWidgetCheckList(NQWidget):
     changed = Signal(str)
 
     char_checked = "☑"
@@ -60,10 +64,35 @@ class NQWidgetCheckList(NQMixin, QListWidget):
             self.display_text = data_list[1]
             self.checked = data_list[2]
 
-    def __init__(self, exclusive=False, read_only=False, *args, **kwargs):
+    class ClickableList(QListWidget):
+        def __init__(self, master, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.master = master
+            self.clicked.connect(self.slot_click)
+
+        def slot_click(self, index):
+            if not self.master.read_only:
+                row_num = index.row()
+                option_name = self.master.order_of_option[row_num].option_name
+                self.master.toggle_focus(option_name)
+                self.master.render_options()
+                self.master.changed.emit(option_name)
+
+    def __init__(self, exclusive=False, read_only=False, title="", use_buttons=True, *args, **kwargs):
         # Mode
         self.exclusive = exclusive
         self.read_only = read_only
+        self.title = title
+        self.use_buttons = use_buttons
+        self.lang = NQApplication.Runtime.Service.NKLang.tran
+
+        # GUI Component
+        self.main_lay: QVBoxLayout = None
+        self.title_label: QLabel = None
+        self.check_list: NQWidgetCheckList.ClickableList = None
+        self.select_all_btn: QPushButton = None
+        self.select_inverse_btn: QPushButton = None
+        self.select_none_btn: QPushButton = None
 
         # Color
         self.checked_color = "#FFFFFF"
@@ -71,15 +100,40 @@ class NQWidgetCheckList(NQMixin, QListWidget):
         self.disabled_color = "#555555"
 
         # Variable
-        self.name_to_option = {}
-        self.order_of_option = []
-        self.list_widget_items = []
+        self.name_to_option: Dict[str, NQWidgetCheckList.Option] = {}
+        self.order_of_option: List[NQWidgetCheckList.Option] = []
+        self.list_widget_items: List[QListWidgetItem] = []
 
         super(NQWidgetCheckList, self).__init__(*args, **kwargs)
 
+    def construct(self):
+        # GUI Components
+        self.main_lay = QVBoxLayout()
+        clear_layout_margin(self.main_lay)
+        self.title_label = QLabel(self.title)
+        self.check_list = self.ClickableList(master=self)
+        self.select_all_btn = QPushButton(self.lang("select_all"))
+        self.select_inverse_btn = QPushButton(self.lang("select_inverse"))
+        self.select_none_btn = QPushButton(self.lang("select_none"))
+
+        super().construct()
+
+        self.setLayout(self.main_lay)
+        if self.title:
+            self.main_lay.addWidget(self.title_label)
+        self.main_lay.addWidget(self.check_list)
+        if not self.exclusive and self.use_buttons:
+            self.main_lay.addLayout(lay(contents=[
+                self.select_all_btn,
+                self.select_inverse_btn,
+                self.select_none_btn
+            ], vertical=False, lead_stretch=None, end_stretch=None, margin=0))
+
     def connect_signals(self):
         # Signals
-        self.clicked.connect(self.slot_click)
+        self.select_all_btn.clicked.connect(self.slot_select_all)
+        self.select_inverse_btn.clicked.connect(self.slot_select_inverse)
+        self.select_none_btn.clicked.connect(self.slot_select_none)
 
     def add_option(self,
                    option_name,
@@ -178,24 +232,16 @@ class NQWidgetCheckList(NQMixin, QListWidget):
 
     def set_checked_all(self, checked=True):
         for option in self.order_of_option:
-            self.name_to_option[option.option_name] = checked
+            self.name_to_option[option.option_name].checked = checked
 
         self.render_options()
-
-    def slot_click(self, index):
-        if not self.read_only:
-            row_num = index.row()
-            option_name = self.order_of_option[row_num].option_name
-            self.toggle_focus(option_name)
-            self.render_options()
-            self.changed.emit(self.order_of_option[row_num].option_name)
 
     def render_options(self):
         # Synchronize Recycling ListWidget
         widget_count_diff = len(self.order_of_option) - len(self.list_widget_items)
 
         if widget_count_diff < 0:
-            self.clear()
+            self.check_list.clear()
             self.list_widget_items = []
             widget_count_diff = len(self.order_of_option) - len(self.list_widget_items)
 
@@ -203,7 +249,7 @@ class NQWidgetCheckList(NQMixin, QListWidget):
             for i in range(widget_count_diff):
                 new_list_widget_item = QListWidgetItem()
                 self.list_widget_items.append(new_list_widget_item)
-                self.addItem(new_list_widget_item)
+                self.check_list.addItem(new_list_widget_item)
 
         # Update Values to ListWidgetItems
         for idx, option in enumerate(self.order_of_option):
@@ -268,3 +314,17 @@ class NQWidgetCheckList(NQMixin, QListWidget):
             self.order_of_option.append(new_option)
             self.name_to_option[new_option.option_name] = new_option
         self.render_options()
+
+    def slot_select_all(self):
+        if not self.exclusive:
+            self.set_checked_all(checked=True)
+
+    def slot_select_inverse(self):
+        if not self.exclusive:
+            for option in self.order_of_option:
+                self.name_to_option[option.option_name].checked = not self.name_to_option[option.option_name].checked
+            self.render_options()
+
+    def slot_select_none(self):
+        if not self.exclusive:
+            self.set_checked_all(checked=False)
