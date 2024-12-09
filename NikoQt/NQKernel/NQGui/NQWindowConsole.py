@@ -111,7 +111,7 @@ class NQWindowPythonConsole(NQWindowConsole):
             self.log_records_count = len(logs)
             self.slot_clear_log()
             for log in logs:
-                log_raw_str = NQFunctions.text_to_html(log.log_context)
+                log_raw_str = NQFunctions.html_escape(log.log_context)
 
                 if log.log_type == NKLogger.STD_OUT:
                     log_str += NQFunctions.color_line(line=log_raw_str,
@@ -178,7 +178,7 @@ class NQWindowNKCmdConsole(NQWindowConsole):
             self.logs_count_cache = len(self.logs)
             self.slot_clear_log()
             for log in self.logs:
-                log_raw_str = NQFunctions.text_to_html(log.log_context)
+                log_raw_str = NQFunctions.html_escape(log.log_context)
 
                 if log.log_creator == self.CmdLog.CREATOR_ME:
                     log_str += NQFunctions.color_line(line=log_raw_str,

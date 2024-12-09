@@ -31,6 +31,21 @@ class NKDatetime:
             return True
         return False
 
+    @staticmethod
+    def secs_to_dhms(seconds):
+        days = seconds // (24 * 3600)
+        seconds %= (24 * 3600)
+        hours = seconds // 3600
+        seconds %= 3600
+        minutes = seconds // 60
+        seconds %= 60
+        return days, hours, minutes, seconds
+
+    @staticmethod
+    def dhms_to_secs(days, hours, minutes, seconds):
+        total_seconds = (days * 24 * 3600) + (hours * 3600) + (minutes * 60) + seconds
+        return total_seconds
+
 
 class NKDate:
     DT_FORMAT = '%Y-%m-%d'

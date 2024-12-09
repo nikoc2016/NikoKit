@@ -34,6 +34,7 @@ class NKLanguage:
                 "minute": u"分钟",
                 "second": u"秒",
                 "start": u"开始",
+                "finish": u"结束",
                 "end": u"结束",
                 "name": u"名字",
                 "error": u"错误",

@@ -13,6 +13,7 @@ class NQWidgetArea(NQMixin, QGroupBox):
         # GUI Component
         self._main_lay = QVBoxLayout()
         self._title_lay = QHBoxLayout()  # Hide\Show Arrow, Bold Title, Additional ToolButtons
+        self._title_label = QLabel()  # Post-change of title
         self.collapse_btn = QToolButton()  # Toggle to hide\show body_adaptor
         self.collapse_btn.setArrowType(Qt.DownArrow)
         self.collapse_btn.setStyleSheet("QToolButton { background-color: transparent; border: none; }")
@@ -20,6 +21,7 @@ class NQWidgetArea(NQMixin, QGroupBox):
         self.central_layout = central_layout  # User Custom Layout
         self.central_widget = central_widget  # User Custom Central Widget
 
+        self.set_title(title)
         super(NQWidgetArea, self).__init__(*args, **kwargs)  # Will call construct and connect_signals from parent.
 
     def construct(self):
@@ -32,7 +34,7 @@ class NQWidgetArea(NQMixin, QGroupBox):
         self._title_lay.setSpacing(5)
         if self.collapsable:
             self._title_lay.addWidget(self.collapse_btn)
-        self._title_lay.addWidget(QLabel("<b>{}</b>".format(self.title)))
+        self._title_lay.addWidget(self._title_label)
 
         clear_layout_margin(self._main_lay)
         super(NQWidgetArea, self).setLayout(self._main_lay)
@@ -66,3 +68,7 @@ class NQWidgetArea(NQMixin, QGroupBox):
 
     def toggle_collapsed(self):
         self.set_collapsed(not self._collapsed)
+
+    def set_title(self, title_str):
+        self.title = title_str
+        self._title_label.setText("<b>{}</b>".format(self.title))

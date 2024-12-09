@@ -1,5 +1,6 @@
-from PySide2.QtCore import Qt, Signal
-from PySide2.QtWidgets import QListWidget, QListWidgetItem, QWidget, QVBoxLayout
+from PySide2.QtCore import QEvent
+
+from NikoKit.NikoQt.NQAdapter import Signal, QListWidget, QListWidgetItem, QWidget, QVBoxLayout
 
 
 class NQWidgetTaskList(QListWidget):
@@ -36,7 +37,7 @@ class NQWidgetTaskList(QListWidget):
     def _wrap_task_widget(self, task_widget: QWidget):
         wrapper = QWidget()
         layout = QVBoxLayout(wrapper)
-        layout.setContentsMargins(10, 5, 10, 5)  # Add 5px margin to all sides
+        layout.setContentsMargins(2, 2, 2, 2)  # Add 5px margin to all sides
         layout.addWidget(task_widget)
         task_widget.setObjectName("TaskWidgetOriginal")
         return wrapper
@@ -48,9 +49,19 @@ class NQWidgetTaskList(QListWidget):
         if task_widget not in self.task_widgets:
             self.task_widgets.append(task_widget)
             wrapped_task_widget = self._wrap_task_widget(task_widget)
+            wrapped_task_widget.installEventFilter(self)  # EventFilter for hijack custom widget click event.
             item = QListWidgetItem(self)
             self.setItemWidget(item, wrapped_task_widget)
             item.setSizeHint(wrapped_task_widget.sizeHint())
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.MouseButtonPress:
+            for index, task_widget in enumerate(self.task_widgets):
+                if obj is self.itemWidget(self.item(index)):
+                    self.setCurrentRow(index)
+                    self.task_clicked.emit(index, task_widget)
+                    break
+        return super(NQWidgetTaskList, self).eventFilter(obj, event)
 
     def insert_task(self, task_widget, index):
         if task_widget not in self.task_widgets:
@@ -77,8 +88,11 @@ class NQWidgetTaskList(QListWidget):
             self.select_task_by_index(index)
 
     def select_task_by_index(self, index):
-        item = self.item(index)
-        self.setCurrentItem(item)
+        if 0 <= index < len(self.task_widgets):
+            item = self.item(index)
+            self.setCurrentItem(item)
+            widget = self.task_widgets[index]
+            self.task_clicked.emit(index, widget)
 
     def get_selected_task(self):
         item = self.currentItem()
