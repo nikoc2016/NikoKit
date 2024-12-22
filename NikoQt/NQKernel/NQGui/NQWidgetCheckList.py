@@ -139,7 +139,8 @@ class NQWidgetCheckList(NQWidget):
                    option_name,
                    display_text="",
                    checked=True,
-                   at_index=None):
+                   at_index=None,
+                   bypass_render=False):
 
         if option_name in self.name_to_option.keys():
             return False
@@ -157,9 +158,9 @@ class NQWidgetCheckList(NQWidget):
 
         self.name_to_option[option_name] = option
 
-        self.set_focus(option_name=option_name, set_check=checked)
-
-        self.render_options()
+        if not bypass_render:
+            self.set_focus(option_name=option_name, set_check=checked)
+            self.render_options()
 
         return True
 
