@@ -3,6 +3,8 @@ import os.path as p
 
 from NikoKit.NikoStd import NKConst, NKLaunch
 
+from NikoKit.NikoLib.NKFileSystem import boom_dir
+
 
 class NKRoboCopy:
     """
@@ -17,6 +19,11 @@ class NKRoboCopy:
     NKRoboCopy.mirror_dir_to_dir(string Source-dir,
                                  string Copy-to-dir,
                                  bool print_result)
+
+    NKRoboCopy.mirror_with_exclusion(string Source-dir,
+                                     string Copy-to-dir,
+                                     list<str> excludes,  # Relative files or dirs
+                                     bool print_result)
 
     If copy OK,  return str = ""
     If copy BAD, return str = "error detail"
@@ -62,6 +69,51 @@ class NKRoboCopy:
         process = NKLaunch.run_pipe(command_line)
         error_message = NKRoboCopy.handle_stdout(process=process, silent_mode=silent_mode)
 
+        return error_message
+
+    @staticmethod
+    def mirror_with_exclusion(source_dir, target_dir, excludes, silent_mode=True):
+        # Normalize Path
+        source_dir = p.abspath(source_dir)
+        target_dir = p.abspath(target_dir)
+
+        # Boom it
+        boom_dir(target_dir)
+        os.makedirs(target_dir, exist_ok=True)
+
+        # Prevent infinite loop if target_dir is inside source_dir
+        excludes.append(target_dir)
+
+        exclude_files = []
+        exclude_dirs = []
+
+        for rel_path in excludes:
+            abs_path = rel_path
+            if not p.isabs(rel_path):
+                abs_path = p.abspath(p.join(source_dir, rel_path))
+
+            if p.exists(abs_path):
+                if p.isdir(abs_path):
+                    exclude_dirs.append(abs_path)
+                else:
+                    exclude_files.append(abs_path)
+            else:
+                if rel_path.endswith("/") or rel_path.endswith("\\"):
+                    exclude_dirs.append(abs_path)
+                else:
+                    exclude_files.append(abs_path)
+
+        # Construct robocopy command using absolute paths
+        command_line = ['robocopy', '/R:0', '/W:0', '/MIR', source_dir, target_dir]
+
+        for d in exclude_dirs:
+            command_line += ['/XD', d]
+        for f in exclude_files:
+            command_line += ['/XF', f]
+
+        # Run
+        process = NKLaunch.run_pipe(command_line)
+        error_message = NKRoboCopy.handle_stdout(process=process, silent_mode=silent_mode)
         return error_message
 
     @staticmethod
